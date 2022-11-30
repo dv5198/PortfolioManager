@@ -1,0 +1,103 @@
+{% extends 'base.html' %} 
+{% load template_filters %}
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="#"> RSU Awards </a></li>
+  </ul>
+{% endblock %} 
+
+{% block applicableactions %} 
+    <a style="padding-right:20px;" href="create"><i class="fa fa-plus" aria-hidden="true" title="Add RSU Award" style="font-size: 1.2em;"></i></a>
+    <a href="refresh"><i class="fa fa-sync" aria-hidden="true" title="Refresh" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+  <table class="table table-borderless">
+    <tr>
+      <td>
+        <ul class="nav nav-pills">
+          <li class="nav-item">
+            <a class="nav-link active" href="#">Awards</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="insights">Insights</a>
+          </li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+
+  <table class="table table-hover dt-responsive" id="rsu-table" style="width:100%">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Exchange</th>
+        <th scope="col">Symbol</th>
+        <th scope="col">Award Date</th>
+        <th scope="col">Award ID</th>
+        <th scope="col">Awarded</th>
+        <th scope="col">Vested</th>
+        <th scope="col">User</th>
+        <th scope="col">Goal</th>
+        <th scope="col">Latest Conversion Price</th>
+        <th scope="col">Latest Price</th>
+        <th scope="col">Available For Sell</th>
+        <th scope="col">Aquisition Value</th>
+        <th scope="col">Latest Value</th>
+        <th scope="col">As On Date</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for instance in object_list %}
+      <tr>
+        <th scope="row">{{ instance.id }}</th>
+        <td>{{ instance.exchange }}</td>
+        <td>{{ instance.symbol }}</td>
+        <td>{{ instance.award_date }}</td>
+        <td><a href="{{ instance.award_id }}"></a>{{ instance.award_id }}</a></td>
+        <td>{{ instance.shares_awarded }}</td>
+        {% if award_latest_vals|lookup:instance.id == None %}
+        <td></td>
+        {% else %}
+        <td>{{ award_latest_vals|lookup:instance.id|lookup:'shares_vested' }}</td>        
+        {% endif %}
+        
+        <td>{{ user_name_mapping |lookup:instance.user }}</td>
+        <td>{{ goal_name_mapping|lookup:instance.goal }}</td>
+        {% if award_latest_vals|lookup:instance.id == None %}
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        {% else %}
+        <td>{{ award_latest_vals|lookup:instance.id|lookup:'latest_conversion_rate' }}</td>
+        <td>{{ award_latest_vals|lookup:instance.id|lookup:'latest_price' }}</td>
+        <td>{{ award_latest_vals|lookup:instance.id|lookup:'shares_for_sale' }}</td>
+        <td>{{ award_latest_vals|lookup:instance.id|lookup:'aquisition_price' }}</td>
+        <td>{{ award_latest_vals|lookup:instance.id|lookup:'latest_value' }}</td>
+        <td>{{ award_latest_vals|lookup:instance.id|lookup:'as_on_date' }}</td>
+        {% endif %}
+        <td>
+          <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}update"><i class="far fa-edit" aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}vest"><i class="far fa-file-alt" aria-hidden="true"></i></a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
+
+<script>
+  {% block jquery %}
+    $('#rsu-table').DataTable({
+      "columnDefs": [
+          { "type": "num", "targets": [0,4,5,6,9,10,11,12] }
+      ]
+    });
+  {% endblock jquery %}
+</script>

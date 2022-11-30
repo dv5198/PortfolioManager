@@ -1,0 +1,616 @@
+{% extends "base.html" %}
+
+{% block style %}
+<style>
+  #tempChart {
+    width: 200px;
+    height:200px;
+    margin: 0px auto;
+  }
+  #start {
+    width: 600px;
+    height:200px;
+    margin: 0px auto;
+    text-align: center;  
+  }
+  .center {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+  }
+  .pull-left {float:left;}
+  
+
+</style>
+{% endblock style %}
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="">Dashboard</a></li>
+  </ul>
+{% endblock viewname %}
+
+{% block canvas %}
+<div style="width:100%; display:none;">
+  <canvas id="myChart"></canvas>
+</div>
+
+{% endblock canvas %}
+
+{% block applicableactions %} 
+  <div class="btn-toolbar mb-2 mb-md-0">
+    <div class="btn-group mr-2">
+      <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" id="export">Export</button>
+    </div>
+    <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <span data-feather="calendar"></span>
+      Interval
+      <div class="dropdown-menu" id="chart_interval">
+        <a class="dropdown-item" href="#" id="action-month">1 Month</a>
+        <a class="dropdown-item" href="#" id="action-3month">3 Months</a>
+        <a class="dropdown-item" href="#" id="action-6month">6 Months</a>
+        <a class="dropdown-item" href="#" id="action-1year">1 Year</a>
+        <a class="dropdown-item" href="#" id="action-2year">2 Years</a>
+        <a class="dropdown-item" href="#" id="action-3year">3 Years</a>
+        <a class="dropdown-item" href="#" id="action-5year">5 Years</a>
+        <a class="dropdown-item" href="#" id="action-ytd">YTD</a>
+        <a class="dropdown-item" href="#" id="action-all">Max</a>
+      </div>
+    </button>
+  </div>
+{% endblock applicableactions %}
+
+{% block content %}
+<div class="row">
+  <div class="col-sm-4">
+    <div class="card">
+      <div class="card-body">
+        <h5><u>Stock Update</u></h5>
+        <h5 class="card-title" id="stock_name"></h5>
+        <h6 class="pull-left">Current Price:</h6> <span><p id="stock_current_price" class=""></p></span>
+        <h6 class="pull-left">Previous Closing Price:</h6> <span><p id="stock_closing_price" class=""></p></span>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-4">
+    <div class="card">
+      <div class="card-body">
+        <h5><u>Stock Update</u></h5>
+        <h5 class="card-title" id="stock_name_niftyBank"></h5>
+       
+        <h6 class="pull-left">Current Price:</h6> <span><p id="stock_current_price_niftyBank" class=""></p></span>
+        <h6 class="pull-left">Previous Closing Price:</h6> <span><p id="stock_closing_price_niftyBank" class=""></p></span>
+        
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-4">
+    <div class="card">
+      <div class="card-body">
+        <h5><u>Stock Update</u></h5>
+        <h5 class="card-title" id="stock_name_sensex"></h5>
+       
+        <h6 class="pull-left">Current Price:</h6> <span><p id="stock_current_price_sensex" class=""></p></span>
+        <h6 class="pull-left">Previous Closing Price:</h6> <span><p id="stock_closing_price_sensex" class=""></p></span>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  <div id="tempChart" class='col-sm-12 col-md-6 col-lg-6'>
+    <canvas id="myTempChart" margin="auto" position="absolute"></canvas>
+  </div>
+  <hr>
+  <div id="usercharts">
+    {% if users %}
+      <u><b>All Users</b></u>
+      <hr>
+      <div class="card-deck">
+        <div class="card" style="width:100%;height:28vh;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+          <canvas id="all_classificationChart"></canvas>
+        </div>
+        <div class="card" style="width:100%;height:28vh;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+          <canvas id="all_distributionChart"></canvas>
+        </div>
+        <div class="card" style="width:100%;height:28vh;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+          <canvas id="all_statusChart"></canvas>
+        </div>
+      </div>
+      <br><br>
+    {% endif %}
+    {% for key, value in users.items %}
+        {{value.name}}
+        <hr>
+        <div class="card-deck">
+          <div class="card" style="width:100%;height:28vh;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+            <canvas id="{{key}}_classificationChart"></canvas>
+          </div>
+          <div class="card" style="width:100%;height:28vh;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+            <canvas id="{{key}}_distributionChart"></canvas>
+          </div>
+          <div class="card" style="width:100%;height:28vh;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+            <canvas id="{{key}}_statusChart"></canvas>
+          </div>
+        </div>
+        <br><br>
+    {% endfor %}
+  </div>
+{% endblock content %}
+
+<script>
+  {% block jquery %}
+  
+  $(document).ready(function(){
+    var investmentdata = {{investment_data|safe}}
+    var users = {{users|safe}}
+    var all = {{all|safe}}
+    var debt_equity_labels = ['Debt' + ' (' + all.debt_per + '%)', 'Equity'+ ' (' + all.equity_per + '%)', 'Gold'+' (' + all.gold_per + '%)', 'Cash'+' (' + all.cash_per + '%)']
+    var debt_equity = [all.debt, all.equity, all.gold, all.cash]
+    var distribution_vals = all.distrib_vals
+    var status_vals = [all.achieved, all.remaining]
+    var distribution_labels = all.distrib_labels
+    var distribution_colors = all.distrib_colors
+    var remaining_per = {{all.remaining_per|safe}}
+    var achieve_per = {{all.achieve_per|safe}}
+    var status_labels = ['Achieved' + ' (' + achieve_per + '%)', 'Remaining'+ ' (' + remaining_per + '%)']
+
+    var x;
+    var user;
+    if (!jQuery.isEmptyObject(users)) {
+      setChart('all',debt_equity,distribution_vals, distribution_colors,status_vals, status_labels, debt_equity_labels)
+    }
+    for (x in users) {
+
+        user = users[x]
+        
+        data = user['data']
+        
+        debt_equity = [data.debt, data.equity, data.gold, data.cash]
+        debt_equity_labels = ['Debt' + ' (' + data.debt_per + '%)', 'Equity'+ ' (' + data.equity_per + '%)', 'Gold'+' (' + data.gold_per + '%)', 'Cash'+' (' + data.cash_per + '%)']
+        distribution_vals = data.distrib_vals
+        distribution_labels = data.distrib_labels
+        distribution_colors = data.distrib_colors
+        status_vals = [data.achieved, data.remaining]
+        status_labels = ['Achieved' + ' (' + data.achieve_per + '%)', 'Remaining'+ ' (' + data.remaining_per + '%)']
+        setChart(x, debt_equity,distribution_vals, distribution_colors, status_vals, status_labels, debt_equity_labels)
+    }
+    document.getElementById("myChart").style.display="none"
+
+   
+    
+    if (users == '') {
+      console.log("no users are present")
+
+      document.getElementById("myChart").style.display="none"
+      document.getElementById("myTempChart").style.display="none"
+      
+    } else {
+
+     // document.getElementById("start").style.display="none" 
+      console.log('Nisha')
+    
+      var canvas = document.getElementById('myTempChart');
+      var context = canvas.getContext('2d');
+      var start = new Date();
+      console.log('==>' , start)
+      var lines = 16,  
+          cW = context.canvas.width,
+          cH = context.canvas.height;
+
+      var draw = function() {
+        var rotation = parseInt(((new Date() - start) / 1000) * lines) / lines;
+        context.save();
+        context.clearRect(0, 0, cW, cH);
+        context.translate(cW / 2, cH / 2);
+        context.rotate(Math.PI * 2 * rotation);
+        for (var i = 0; i < lines; i++) {
+          context.beginPath();
+          context.rotate(Math.PI * 2 / lines);
+          context.moveTo(cW / 10, 0);
+          context.lineTo(cW / 4, 0);
+          context.lineWidth = cW / 40;
+          context.strokeStyle = "rgba(44, 130, 201," + i / lines + ")";
+          context.stroke();
+        }
+        context.restore();
+      };
+      window.setInterval(draw, 1000 / 30);
+
+      if (jQuery.isEmptyObject(investmentdata)) {
+        document.getElementById("myTempChart").style.display="none"
+        document.getElementById("tempChart").style.display="none"
+        document.getElementById("myChart").style.display="block"
+        console.log("error: no investment data")
+      } else {
+        console.log('received investment data for chart')
+        console.log(investmentdata)
+        document.getElementById("myTempChart").style.display="none"
+        document.getElementById("tempChart").style.display="none"
+        document.getElementById("myChart").style.display="block"
+        setInvestmentChart(investmentdata)
+      }
+    }
+    document.getElementById("action-month").addEventListener ("click", function(){updateInterval(1)}, false);
+    document.getElementById("action-3month").addEventListener ("click", function(){updateInterval(3)}, false);
+    document.getElementById("action-6month").addEventListener ("click", function(){updateInterval(6)}, false);
+    document.getElementById("action-1year").addEventListener ("click", function(){updateInterval(12)}, false);
+    document.getElementById("action-2year").addEventListener ("click", function(){updateInterval(24)}, false);
+    document.getElementById("action-3year").addEventListener ("click", function(){updateInterval(36)}, false);
+    document.getElementById("action-5year").addEventListener ("click", function(){updateInterval(60)}, false);
+    document.getElementById("action-ytd").addEventListener ("click", function(){updateInterval(0)}, false);
+    document.getElementById("action-all").addEventListener ("click", function(){updateInterval(-1)}, false);
+
+
+    function updateInterval(duration) {
+      console.log(duration)
+
+      var today = new Date();
+      var from_date = "none"
+      if (duration == 0) {
+        let year = today.getFullYear()
+        from_date = [year, 1, 1].join('-')
+      }
+      if (duration > 0) {
+        let year = today.getFullYear()
+        let month = today.getMonth() + 1
+        while (duration > 0) {
+          month = month -1
+          if (month == 0) {
+            month = 12
+            year = year - 1
+          }
+          duration = duration -1
+        }
+        from_date = [year, month, 1].join('-')
+      }
+
+      Chart.helpers.each(Chart.instances, function(instance){
+        console.log(instance);
+        if (instance.canvas.id == "myChart") {
+          console.log("this is the chart");
+            instance.options.scales.xAxes[0].time.min = from_date;
+            instance.update();
+        }
+      });
+      return false;
+    }
+
+    document.getElementById("export").addEventListener ("click", function(){exportData()}, false);
+    function exportData() {
+      export_ep = '/api/export/';
+      console.log('getting export data')
+      $.ajax({
+          method:"GET",
+          url:export_ep,
+          async: false,
+          success: function(data){
+            console.log(data)
+            for (val in data) {
+              console.log('returning ', data[val]);
+              ret = data[val];
+            }
+            let blobData = new Blob([JSON.stringify(data)], {
+              type: "text/plain"
+            });
+            let url = window.URL.createObjectURL(blobData);
+            saveFile("portfolio_manager_data.json", url);
+          },
+          error: function(error_data){
+            console.log("error")
+            console.log(error_data)
+          }
+      })
+    }
+
+    function saveFile(fileName, urlFile) {
+      let a = document.createElement("a");
+      a.style = "display: none";
+      document.body.appendChild(a);
+      a.href = urlFile;
+      a.download = fileName;
+      a.click();
+      window.URL.revokeObjectURL(urlFile);
+      a.remove();
+    }
+
+    function data2blob(data, isBase64) {
+      var chars = "";
+
+      if (isBase64)
+        chars = atob(data);
+      else
+        chars = data;
+
+      var bytes = new Array(chars.length);
+      for (var i = 0; i < chars.length; i++) {
+        bytes[i] = chars.charCodeAt(i);
+      }
+
+      var blob = new Blob([new Uint8Array(bytes)]);
+      return blob;
+    }
+
+    function setInvestmentChart(investment_data) {
+      var ctx = document.getElementById("myChart");
+      var config = {
+        type:    'line',
+        data:    {
+          datasets: [
+            {
+              label: "PPF",
+              data: investment_data.ppf,
+              fill: false,
+              borderColor: '#92993c'
+            },
+            {
+              label: "401K",
+              data: investment_data.r401k,
+              fill: false,
+              borderColor: '#617688'
+            },
+            {
+              label: "EPF",
+              data: investment_data.epf,
+              fill: false,
+              borderColor: '#f15664'
+            },
+            {
+              label: "SSY",
+              data: investment_data.ssy,
+              fill:  false,
+              borderColor: '#f9c5c6'
+            },
+            {
+              label: "FD",
+              data: investment_data.fd,
+              fill:  false,
+              borderColor: '#006f75'
+            },
+            {
+              label: "ESPP",
+              data: investment_data.espp,
+              fill:  false,
+              borderColor: '#DC7633'
+            },
+            {
+              label: "RSU",
+              data: investment_data.rsu,
+              fill:  false,
+              borderColor: '#AA12E8'
+            },
+            {
+              label: "Shares",
+              data: investment_data.shares,
+              fill:  false,
+              borderColor: '#e31219'
+            },
+            {
+              label: "Mutual Funds",
+              data: investment_data.mf,
+              fill:  false,
+              borderColor: '#bfff00'
+            },
+            {
+              label: "Insurance",
+              data: investment_data.insurance,
+              fill:  false,
+              borderColor: '#ede76d'
+            },
+            {
+              label: "Gold",
+              data: investment_data.gold,
+              fill:  false,
+              borderColor: '#ffd700'
+            },
+            {
+              label: "Cash",
+              data: investment_data.cash,
+              fill:  false,
+              borderColor: '#E3CA95'
+            },
+            {
+              label: "Loan",
+              data: investment_data.loan,
+              fill:  false,
+              borderColor: '#34abeb'
+            },
+            {
+              label: "Total",
+              data: investment_data.total,
+              fill:  false,
+              borderColor: '#99A3A4'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio:false,
+          title:      {
+            display: true,
+            text:    "Portfolio (Since "+investment_data.start_date+") As on "+investment_data.as_on_date_time
+          },
+          scales:     {
+            xAxes: [{
+              type:       "time",
+              time:       {
+                format: 'YYYY-MM-DD',
+                tooltipFormat: 'll'
+              },
+              scaleLabel: {
+                display:     true,
+                labelString: 'Date'
+              }
+            }],
+            yAxes: [{
+              scaleLabel: {
+                display:     true,
+                labelString: 'Amount'
+              }
+            }]
+          }
+        }
+      };
+      var myChart = new Chart(ctx,config);
+    }
+
+    function setChart(id, debt_equity,distribution_vals, distribution_colors, status_vals, status_labels, debt_equity_labels){
+      var ctx = document.getElementById(id+'_classificationChart').getContext('2d');
+      var config = {
+        type: 'pie',
+        data: {
+          datasets: [{
+            data: debt_equity,
+            backgroundColor: [
+              '#519463', '#a85b6a', '#ffd700', '#E3CA95'
+            ],
+            label: 'Classification'
+          }],
+          labels: debt_equity_labels
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio:false,
+          title: {
+            display: true,
+            text: 'Classification'
+          }
+        }
+      };
+      var ctx2 = document.getElementById(id+'_distributionChart').getContext('2d');
+      var config2 = {
+        type: 'doughnut',
+        data: {
+          datasets: [{
+            data: distribution_vals,
+            backgroundColor: distribution_colors,
+            label: 'Distribution'
+          }],
+          labels: distribution_labels
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio:false,
+          title: {
+            display: true,
+            text: 'Distribution'
+          },
+          tooltips: {
+            callbacks: {
+              label: function(tooltipItem, data) {
+                var dataset = data.datasets[tooltipItem.datasetIndex];
+                var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+                  return previousValue + currentValue;
+                });
+                var currentValue = dataset.data[tooltipItem.index];
+                var percentage = Math.floor(((currentValue/total) * 100)+0.5);         
+                return data.labels[tooltipItem.index] + ": " + currentValue + ' (' + percentage + "%)";
+              }
+            }
+          }
+        }
+      };
+      var ctx3 = document.getElementById(id+'_statusChart').getContext('2d');
+      var config3 = {
+        type: 'pie',
+        data: {
+          datasets: [{
+            data: status_vals,
+            backgroundColor: [
+              '#519463', '#a85b6a'
+            ],
+            label: 'Status'
+          }],
+          labels: status_labels
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio:false,
+          title: {
+            display: true,
+            text: 'Goal Status'
+          }
+        }
+      };
+      var classificationChart = new Chart(ctx,config);
+      var distributionChart = new Chart(ctx2, config2);
+      var statusChart = new Chart(ctx3, config3);
+    }
+    
+  })
+  {% endblock jquery %}
+  </script>
+
+{% block javascript %}
+  <script>
+      $(document).ready(function(){
+          $.ajax({ url: "stocks/",
+              type: "GET",
+              processData:false,
+              contentType: false,             
+              success: function(data){
+                console.log(data.metadata)
+                $('#card').append($('#stock_name').text(data.metadata.indexName));
+                $('#card').append($('#stock_closing_price').text(data.metadata.previousClose));
+                $('#card').append($('#stock_current_price').text(data.metadata.last));
+              }
+          },5000);
+
+          $.ajax({ url: "stocks/nifty_bank",
+          type: "GET",
+          processData:false,
+          contentType: false,             
+          success: function(data){
+            console.log(data.metadata)
+            $('#card').append($('#stock_name_niftyBank').text(data.metadata.indexName));
+            $('#card').append($('#stock_closing_price_niftyBank').text(data.metadata.previousClose));
+            $('#card').append($('#stock_current_price_niftyBank').text(data.metadata.last));
+          }
+      },5000);
+
+      $.ajax({ url: "stocks/sensex",
+      type: "GET",
+      processData:false,
+      contentType: false,             
+      success: function(data){
+        console.log(data)
+        $('#card').append($('#stock_name_sensex').text(data[0]["indxnm"]));
+        $('#card').append($('#stock_closing_price_sensex').text(data[0]["I_open"]));
+        $('#card').append($('#stock_current_price_sensex').text((data[0]["Prev_Close"])));
+      }
+  },5000);
+      });
+      $('#action-week').click(function(e) {
+        alert('week');
+        e.preventDefault();// prevent the default anchor functionality
+        var endpoint = '/user/api/chart/data/'
+        $.ajax({
+          method: "GET",
+          url: endpoint,
+          success: function(data){
+            //console.log(data)
+            debt_equity = [data.debt, data.equity]
+            distribution_vals = data.distrib_vals
+            distribution_labels = data.distrib_labels
+            distribution_colors = data.distrib_colors
+            status_vals = [data.achieved, data.remaining]
+            console.log("debt_equity values")
+            console.log(debt_equity)
+            console.log("distribution_vals values")
+            console.log(distribution_vals)
+            console.log("status_vals values")
+            console.log(status_vals)
+            setChart()
+          },
+          error: function(error_data){
+            console.log("error")
+            console.log(error_data)
+          }
+        })
+      });
+  </script>
+{% endblock javascript %}

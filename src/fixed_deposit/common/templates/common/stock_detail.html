@@ -1,0 +1,35 @@
+{% extends 'base.html' %} 
+{% load template_filters %}
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'common:common-list' %}">Internals</a></li>
+    <li><a href="{% url 'common:stocks-list' %}">Stocks Being Tracked</a></li>
+    <li><a href="#">{{ object.symbol }}</a></li>
+  </ul>
+{% endblock %} 
+
+{% block applicableactions %}
+    <a href="stocks/refresh"><i class="fa fa-sync" aria-hidden="true" title="Refresh" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+  <table class="table table-hover">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Exchange</th>
+        <th scope="col">Symbol</th>
+        <th scope="col">Collection Start Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">{{ object.id }}</th>
+        <td>{{ object.exchange }}</td>
+        <td>{{ object.symbol }}</td>
+        <td>{{ object.collection_start_date }}</td>
+      </tr>
+    </tbody>
+  </table>
+{% endblock %}

@@ -1,0 +1,102 @@
+{% extends 'base.html' %} 
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="#">Mutual Funds</a></li>
+  </ul>
+{% endblock %} 
+
+{% block applicableactions %} 
+    <a href="refresh"><i class="fa fa-sync" aria-hidden="true" title="Refresh" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;" href="transactions"><i class="far fa-file-alt" aria-hidden="true" title="All Transactions" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;" href="upload"><i class="fa fa-upload" aria-hidden="true" title="Upload Transactions" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;" href="add"><i class="fa fa-plus" aria-hidden="true" title="Add Transaction" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;padding-right:25px;" href="delete" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true" title="Delete Folios" style="font-size: 1.2em;"></i></a>
+
+{% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+  <table class="table table-borderless">
+    <tr>
+      <td><ul class="nav nav-pills">
+        <li class="nav-item">
+          <a class="nav-link" href="../mutualfunds/">Folios</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="returns">Funds & Returns</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="insights">Insights</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="#">SIP</a>
+        </li>
+      </ul></td>
+    </tr>
+    <tr></tr>
+    <tr>
+      <td style="text-align:right"><b>Total SIP:</b> {{sip_count}} &nbsp;&nbsp;&nbsp;<b>Total Amount:</b> {{sip_amount}} </td>
+    </tr>
+  </table>
+  <table class="table table-hover dt-responsive" id="sip-table" style="width:100%">
+    <thead class="thead-dark">
+      <tr>
+        <th>Folio</th>
+        <th>Name</th>
+        <th>User</th>
+        <th>Amount</th>
+        <th>Date</th>
+        <th>Broker</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for instance in sips %}
+      <tr>
+        <td>{{ instance.folio }}</a></td>
+        <td>{{ instance.name }}</td>
+        <td>{{ user_name_mapping |lookup:instance.user }}</td>
+        <td>{{ instance.amount }}</td>
+        <td>{{ instance.date }}</td>
+        <td>{{ instance.broker }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock content %}
+
+<script>
+{% block jquery %}
+    //$("#myFilter").on("keyup", function() {
+    //  var value = $(this).val().toLowerCase();
+    //  $("#folioTable tr").filter(function() {
+    //    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    //  });
+    //});
+    //  $("#myFilter").on("keyup", function() {
+        
+    //     var unicode = event.charCode ? event.charCode : event.keyCode;
+    /*        if (unicode == 27) { $(this).val(""); }
+            var searchKey = $(this).val().toLowerCase();
+            $('.accordion-toggle').each(function() {
+                var cellText = $(this).text().toLowerCase();
+                var accordion = $('#accordion panel');           
+        
+                if (cellText.indexOf(searchKey) >= 0) {
+                    $(this).parent().parent().show();
+                } else {
+                    $(this).parent().parent().hide();
+                     $('.panel-collapse.in').collapse('hide');
+                }
+            });
+            
+      });
+      */
+
+      $('#sip-table').DataTable({
+        "columnDefs": [
+            { "type": "num", "targets": [3,4] }
+        ]
+      });
+{% endblock jquery %}
+</script>

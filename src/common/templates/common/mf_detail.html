@@ -1,0 +1,61 @@
+{% extends 'base.html' %} 
+{% load template_filters %}
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'common:common-list' %}">Internals</a></li>
+    <li><a href="{% url 'common:mf-list' %}">Mutual Funds</a></li>
+    <li><a href="#">{{ object.name }}</a></li>
+  </ul>
+{% endblock %} 
+
+{% block applicableactions %}
+    <a href="mf/refresh"><i class="fa fa-sync" aria-hidden="true" title="Refresh" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+  <table class="table table-hover">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Code</th>
+        <th scope="col">Name</th>
+        <th scope="col">ISIN</th>
+        <th scope="col">ISIN2</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">{{ object.id }}</th>
+
+        <td>
+          <a href="{{ object.get_absolute_url }}">{{ object.code }}</a>
+        </td>
+        <td>{{ object.name }}</td>
+        <td>{{ object.isin }}</td>
+        <td>{{ object.isin2 }}</td>
+      </tr>
+    </tbody>
+  </table>
+  <table class="table table-hover" style="width:50%">
+      <tr>
+        <th scope="col">Fund House</th> <td>{{ object.fund_house }}</td>
+      </tr>
+      <tr>
+        <th scope="col">Kuvera Name</th>        <td>{{ object.kuvera_name }}</td>
+      </tr>
+      <tr>
+        <th scope="col">BSEStar Name</th>        <td>{{ object.bse_star_name }}</td>
+      </tr>
+      <tr>
+        <th scope="col">Collection Start Date</th>        <td>{{ object.collection_start_date }}</td>
+      </tr>
+      <tr>
+        <th scope="col">MS Name</th>        <td>{{ object.ms_name }}</td>
+      </tr>
+
+      <tr>
+        <th scope="col">MS Id</th>        <td>{{ object.ms_id }}</td>
+      </tr>
+  </table>
+{% endblock %}

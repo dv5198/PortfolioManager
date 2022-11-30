@@ -1,0 +1,224 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}
+    <a style="padding-left:25px;" href="add-transaction"><i class="fa fa-plus" aria-hidden="true" title="Add Transaction" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:20px;" href="transactions"><i class="far fa-file-alt" aria-hidden="true" title="Transactions" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'retirement_401k:account-list' %}">401K</a></li>
+    <li><a href="#">{{ company }}</a></li>
+  </ul>
+{% endblock viewname %}
+
+{% block content %}
+  <div class="row">
+    <div class='col-sm-12 col-md-6 col-lg-4'>
+      <table class="table table-borderless">
+        <tr>
+          <td>Company</td>
+          <td>{{ company }}</td>
+        </tr>
+        <tr>
+          <td>Start Date</td>
+          <td>{{ start_date }}</td>
+        </tr>
+        <tr>
+          <td>User</td>
+          <td>{{ user }}</td>
+        </tr>
+        <tr>
+          <td>Goal</td>
+          <td>{{ goal }}</td>
+        </tr>
+        <tr>
+          <td>Employee Contribution</td>
+          <td>${{ employee_contribution }}</td>
+        </tr>
+        <tr>
+          <td>Employer Contribution</td>
+          <td>${{ employer_contribution }}</td>
+        </tr>
+        <tr>
+          <td>Total Contribution</td>
+          <td>${{ total }}</td>
+        </tr>
+        <tr>
+          <td>Units</td>
+          <td>{{ units }}</td>
+        </tr>
+        <tr>
+          <td>ROI</td>
+          <td>{{ roi }}%</td>
+        </tr>
+        <tr>
+          <td>Latest Value</td>
+          <td>{{ latest_value }} (${{lv_dollar}})</td>
+        </tr>
+        <tr>
+          <td>Latest NAV</td>
+          <td>${{ nav }}</td>
+        </tr>
+        <tr>
+          <td>As on</td>
+          <td>{{ as_on_date }}</td>
+        </tr>
+      </table>
+    </div>
+    <div class='col-sm-12 col-md-6 col-lg-4' style="width:75%;height:40vh">
+      <canvas id="bar-vertical"></canvas>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col-sm-8">
+      <div class="row">
+        <div class="col-sm-8"><h5>NAV History <small><a style="padding-left:25px;" href="{% url 'retirement_401k:nav-add' id %}"><i class="fa fa-plus" aria-hidden="true" title="Add Transaction" style="font-size: 1.2em;"></i></a></small></h5></div>
+      </div>
+      <div class="row">
+        <div class="col-sm-8">
+          <br>
+          <table class="table table-hover table-condensed dt-responsive" id="nav-history-table" style="width:100%">
+            <thead class="thead-dark">
+              <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Value</th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for instance in nav_history %}
+              <tr>
+                <td>{{instance.nav_date}}</td>
+                <td>{{instance.nav_value}}</td>
+                <td><a href="{% url 'retirement_401k:nav-delete' id instance.id %}" class="confirm-delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-12 col-md-6 col-lg-4" style="width:75%;height:40vh">
+      <canvas id="fund-compare"></canvas>
+    </div>
+  </div>
+{% endblock content %}
+
+{% block javascript %}
+  <script>
+    $(document).on('click', '.confirm-delete', function(){
+      return confirm('Are you sure you want to delete this NAV?');
+    })
+</script>
+{% endblock javascript %}
+
+<script>
+  {% block jquery %}
+    $('#nav-history-table').DataTable({
+        "columnDefs": [
+            { "type": "date", "targets": [0]}
+        ],
+        "order": [[ 0, "desc" ]]
+    } );
+    {%if fund_vals %}
+    set_nav_comparision_chart({{fund_vals|safe}}, {{spy_vals|safe}}, {{chart_labels|safe}})
+    {% endif %}
+    {%if years %}
+        setChart({{years|safe}}, {{er_vals|safe}}, {{em_vals|safe}}, {{in_vals|safe}}, {{total_vals|safe}})
+    {% endif %}
+
+    function setChart(years, er_vals, em_vals, in_vals, total_vals) {
+      console.log(years)
+      console.log(er_vals)
+      console.log(em_vals)
+      console.log(in_vals)
+      console.log(total_vals)
+      new Chart(document.getElementById("bar-vertical"), {
+        type: 'bar',
+        data: {
+          labels: years,
+          datasets: [
+            {
+              label: "Employee Contribution",
+              backgroundColor: "#3e95cd",
+              data: em_vals
+            }, 
+            {
+              label: "Employer Contribution",
+              backgroundColor: "#8e5ea2",
+              data: er_vals
+            },
+            {
+              label: "Growth",
+              backgroundColor: "#bfff00",
+              data: in_vals
+            },
+            {
+              label: "Total",
+              backgroundColor: "#dc7633",
+              data: total_vals
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio:false,
+          title: {
+            display: true,
+            text: 'Contribution (approx)'
+          }
+        }
+      });
+    }
+    function set_nav_comparision_chart(fund_vals, spy_vals, chart_labels) {
+      var canvas = document.getElementById('fund-compare');
+      new Chart(canvas, {
+        type: 'line',
+        data: {
+          //labels: ['1', '2', '3', '4', '5'],
+          labels: chart_labels,
+          datasets: [{
+            label: 'Fund',
+            yAxisID: 'Fund',
+            //data: [100, 96, 84, 76, 69],
+            data: fund_vals,
+            borderColor: "#3e95cd",
+            fill: false
+          }, {
+            label: 'SPY',
+            yAxisID: 'SPY',
+            //data: [1, 1, 1, 1, 0],
+            data: spy_vals,
+            borderColor: "#bfff00",
+            fill: false
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio:false,
+          title: {
+            display: true,
+            text: 'Fund vs SPY'
+          },
+          scales: {
+            yAxes: [{
+              id: 'Fund',
+              type: 'linear',
+              position: 'left',
+            }, {
+              id: 'SPY',
+              type: 'linear',
+              position: 'right'
+            }]
+          }
+        }
+      });
+    }
+  {% endblock jquery %}
+</script>
+

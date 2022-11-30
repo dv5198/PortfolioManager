@@ -1,0 +1,188 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %} {% endblock applicableactions %} 
+
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %}
+<ul class="breadcrumb">
+  <li><a href="{% url 'rsus:rsu-list' %}">RSU</a></li>
+  <li><a href="#">{{symbol}}/{{award_id}}</a></li>
+  <li><a href="#">{{vest_date}}</a></li>
+  <li><a href="#">Sell RSU</a></li>
+</ul> 
+{% endblock viewname %}
+
+{% block content %}
+<table class="table">
+    <thead class="thead-dark">
+        <tr>
+            <th scope="col">Award</th>
+            <th scope="col">Company</th>
+            <th scope="col">Award Date</th>
+            <th scope="col">Vest Date</th>
+            <th scope="col">Unsold Shares</th>
+            <th scope="col">Aquisition Price</th>
+        </tr>
+    </thead>
+    <tr>
+        <td>{{award_id}} </td>
+        <td>{{symbol}}</td>
+        <td>{{award_date}}</td>
+        <td>{{vest_date}}</th>
+        <td>{{unsold_shares}}</th>
+        <td>{{aquisition_price}}</td>
+    </tr>
+</table>
+<p></p>
+<p></p>
+<form method="POST">
+    {% csrf_token %}
+    <div class="row">
+      <div class='col-sm-6'>
+
+        <div class="form-group row">
+            <label for="sell_date" class="col-sm-3 col-form-label">Sell Date <span style="color:red;">*</span></label>
+            <div class="col-sm-3">
+                <div class="md-form mt-0">
+                    <input type="date" id="sell_date" name="sell_date" value="{{sell_date}}" required="true">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="shares_for_sale" class="col-sm-3 col-form-label">Units <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="number" id="units" name="units" value="{{units}}" required="true">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="sell_price" class="col-sm-3 col-form-label">Sell Price <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="number" step="0.01" id="sell_price" name="sell_price" value="{{sell_price}}" required="true">
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group row">
+          <label for="sell_conversion_rate" class="col-sm-3 col-form-label">Sell Conversion Rate <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="number" step="0.01" id="sell_conversion_rate" name="sell_conversion_rate" value="{{sell_conversion_rate}}" required="true">
+            </div>
+          </div>
+          <div class="col-sm-1">
+            <button class="btn" name="submit" id="id_forex_fetch"><i class="fab fa-get-pocket"></i></button>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="total_sell_price" class="col-sm-3 col-form-label">Total Sell Price <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="number" step="0.01" id="total_sell_price" name="total_sell_price" value="{{total_sell_price}}" required="true">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="notes" class="col-sm-3 col-form-label">Notes</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <textarea name="notes" rows="5" cols="20">{{notes}}</textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <div class="col-sm-6">
+            <div class="md-form mt-0">
+              <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+              <a href="../" class="btn btn-danger" role="button">Cancel</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+</form>
+{% endblock content %}
+
+{% block javascript %}
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
+  <script>
+    $("#sell_conversion_rate").change(function () {
+      setTotalAquisitionPrice();
+    });
+    $("#sell_price").change(function () {
+      setTotalAquisitionPrice();
+    });
+    $("#units").change(function () {
+      setTotalAquisitionPrice();
+    });
+    function setTotalAquisitionPrice(){
+      var units = document.getElementById("units").value;
+      var sell_conversion_rate = document.getElementById("sell_conversion_rate").value;
+      var sell_price = document.getElementById("sell_price").value;
+      if (units!= '' && sell_conversion_rate!='' && sell_price!='') {
+        totalSellPrice = units*sell_price*sell_conversion_rate;
+        console.log(totalSellPrice)
+        document.getElementById("total_sell_price").value = totalSellPrice;
+      }
+    }
+
+    function update_forex_rate_fetch_btn_status() {
+      var dt_elem = document.getElementById("sell_date");
+      //console.log('conv_elem value', dt_elem.value)
+      if (dt_elem.value) {
+        var conv_btn = document.getElementById("id_forex_fetch");
+        conv_btn.disabled = false;
+      } else {
+        var conv_btn = document.getElementById("id_forex_fetch");
+        conv_btn.disabled = true;
+        conv_elem = document.getElementById("sell_conversion_rate");
+        conv_elem.value = '';
+      }
+    }
+
+    function get_forex_rate_and_populate() {
+      //console.log('fetch button clicked');
+      dt = document.getElementById("sell_date").value;
+      var parts = dt.split('-');
+      var year = parts[0];
+      var month = parts[1];
+      var day = parts[2];
+      console.log(year, month, day);
+      exch = "{{exchange}}";
+      console.log(exch)
+      if (exch == 'NASDAQ' || exch == 'NYSE') {
+        var val = get_forex_rate(year, month, day, 'USD', 'INR');
+        console.log('received forex rate as ', val)
+        conv_elem = document.getElementById("sell_conversion_rate");
+        conv_elem.value = val;
+      } else {
+        conv_elem = document.getElementById("sell_conversion_rate");
+        conv_elem.value = 1;
+      }
+    }
+  </script>
+{% endblock javascript %}
+
+{% block jquery %}
+  btn = document.getElementById('id_forex_fetch');
+  btn.disabled = true;
+  btn.onclick = function(){
+    get_forex_rate_and_populate();
+    return false;
+  };
+  update_forex_rate_fetch_btn_status();
+  $("#sell_date").change(function () {
+    //console.log( $(this).val() );
+    update_forex_rate_fetch_btn_status();
+  });
+{% endblock jquery %}

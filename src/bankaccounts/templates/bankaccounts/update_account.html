@@ -1,0 +1,190 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %} {% endblock applicableactions %} 
+
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'bankaccounts:account-list' %}">Bank Accounts</a></li>
+    <li><a href="#">Update Account</a></li>
+  </ul>
+{% endblock viewname %}
+
+{% block content %}
+  <form method="POST">
+    {% csrf_token %}
+    <div class="row">
+      <div class='col-sm-6'>
+
+        {% if message_color == 'green' %}
+        <div class="alert alert-success fade in alert-dismissible show" style="margin-top:18px;">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+             <span aria-hidden="true" style="font-size:20px">×</span>
+           </button>    <strong>Success!</strong> {{message}}
+        </div>
+        {% elif message_color == 'red' %}
+        <div class="alert alert-danger fade in alert-dismissible show" style="margin-top:18px;">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+             <span aria-hidden="true" style="font-size:20px">×</span>
+           </button>    <strong>Error!</strong> {{message}}
+         </div>
+        {% endif %}
+
+        <div class="form-group row">
+          <label for="user" class="col-sm-3 col-form-label">User</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <label>{{user}}</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="number" class="col-sm-3 col-form-label">Number <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="text" id="number" name="number" value="{{number}}" required="true">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="acc_type" class="col-sm-3 col-form-label">Account Type <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select name="acc_type" required="true" id="id_acc_type">
+                <option value="">---------</option>
+                <option value="Savings">Savings</option>
+                <option value="Checking">Checking</option>
+                <option value="Current">Current</option>
+                <option value="HomeLoan">Home Loan</option>
+                <option value="CarLoan">Car Loan</option>
+                <option value="PersonalLoan">Personal Loan</option>
+                <option value="Other">Other</option>
+                <option value="OtherLoan">Other Loan</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="bank_name" class="col-sm-3 col-form-label">Bank Name <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="text" id="bank_name" name="bank_name" value="{{bank_name}}" required="true">
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group row">
+          <label for="start_date" class="col-sm-3 col-form-label">Start Date </label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="date" id="start_date" name="start_date" value="{{start_date}}">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row" id="div_goal">
+          <label for="goal" class="col-sm-3 col-form-label">Goal</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select id="id_goal" name="goal" class="form-control"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="currency" class="col-sm-3 col-form-label">Currency <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select id="id_currencies" name="currency" class="form-control" required="true"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="notes" class="col-sm-3 col-form-label">Notes</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <textarea name="notes" rows="5" cols="20">{{notes}}</textarea>
+            </div>
+          </div>
+        </div>
+        <div class="form-group row">
+          <div class="col-sm-6">
+            <div class="md-form mt-0">
+              <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+              <a href="../" class="btn btn-danger" role="button">Cancel</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+{% endblock content %}
+
+{% block javascript %}
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
+  <script>
+    set_currencies({{currencies|safe}}, '{{currency|safe}}');
+    {% if goals %}
+      var resp = {"goal_list":{{goals|safe}}};
+      get_goals_and_set_goal(resp)
+    {% endif %}
+    set_acc_type('{{acc_type}}')
+    adjust_div_for_loan()
+    $("#id_acc_type").change(function () {
+      adjust_div_for_loan();
+    });
+    function get_goals_and_set_goal(response) {
+      set_goals(response, '{{goal|safe}}');
+    }
+    function set_currencies(currencies, sel_currency) {
+      $('#id_currencies').empty();
+      $('#id_currencies')
+          .append($('<option>', { value : '' })
+          .text(''));
+      var dropdown = document.getElementById('id_currencies');
+      for (x in currencies) {
+        currency = currencies[x]
+        // create new option element
+        var opt = document.createElement('option');
+        // create text node to add to option element (opt)
+        opt.appendChild( document.createTextNode(currency) );
+        // set value property of opt
+        opt.value = currency;
+        if (opt.value == sel_currency) {
+          opt.selected = true;
+        }
+        // add opt to end of select box (sel)
+        dropdown.appendChild(opt);
+      }
+    }
+    function set_acc_type(acc_type) {
+      var accTypes = document.getElementById('id_acc_type');
+      Array.from(document.querySelector("#id_acc_type").options).forEach(function(option_element) {
+        let option_text = option_element.text;
+        let option_value = option_element.value;
+        let is_option_selected = option_element.selected;
+        if (acc_type == option_value) {
+          option_element.selected = true;
+        } else {
+          console.log(option_value)
+          console.log(acc_type)
+        }
+      });
+    }
+    function adjust_div_for_loan() {
+      var sel = document.getElementById('id_acc_type').value;
+      if (sel == 'CarLoan' || sel == 'HomeLoan' || sel == 'PersonalLoan' || sel == 'OtherLoan') {
+        document.getElementById("div_goal").style.display="none";
+      } else {
+        document.getElementById("div_goal").style.display=null;
+      }
+    }
+  </script>
+{% endblock %}

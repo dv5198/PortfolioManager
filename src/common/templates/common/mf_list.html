@@ -1,0 +1,63 @@
+{% extends 'base.html' %} 
+{% load template_filters %}
+{% load static %}
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'common:common-list' %}">Internals</a></li>
+    <li><a href="#">All known Mutual Funds</a></li>
+  </ul>
+{% endblock %} 
+
+{% block applicableactions %} 
+    <a href="refresh"><i class="fa fa-sync" aria-hidden="true" title="Refresh" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;" href="bsestar"><img src="{% static 'BSestarMF.png' %}" height="20" width="24" alt="BSE StAR image"></a>
+    <a style="padding-left:25px;" href="trash"><i class="fa fa-trash" aria-hidden="true" title="Trash" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+  <table class="table table-hover dt-responsive" id="mf-table" style="width:100%">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Code</th>
+        <th scope="col">Name</th>
+        <th scope="col">ISIN</th>
+        <th scope="col">ISIN2</th>
+        <th scope="col">Fund House</th>
+        <th scope="col">Kuvera Name</th>
+        <th scope="col">BSEStar Name</th>
+        <th scope="col">Collection Start Date</th>
+        <th scope="col">Historical Prices</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for instance in object_list %}
+      <tr>
+        <td>{{ instance.id }}</td>
+
+        <td>
+          <a href="{{ instance.get_absolute_url }}">{{ instance.code }}</a>
+        </td>
+        <td>{{ instance.name }}</td>
+        <td>{{ instance.isin }}</td>
+        <td>{{ instance.isin2 }}</td>
+        <td>{{ instance.fund_house }}</td>
+        <td>{{ instance.kuvera_name }}</td>
+        <td>{{ instance.bse_star_name }}</td>
+        <td>{{ instance.collection_start_date }}</td>
+        <td>
+          <a href="{{ instance.get_absolute_url }}historical-prices"><i class="far fa-file-alt" aria-hidden="true"></i></a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <br>
+{% endblock %}
+
+<script>
+  {% block jquery %}
+  $('#mf-table').DataTable();
+  {% endblock jquery %}
+</script>

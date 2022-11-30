@@ -1,0 +1,306 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}
+    <a href="add_loan"><i class="fa fa-plus" aria-hidden="true" title="Add User" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="#">User's Loan Details</a></li>
+  </ul>
+{% endblock viewname %}
+
+
+{% block content %}
+  {% if message_color == 'green' %}
+          
+  <div class="alert alert-success fade in alert-dismissible show" style="margin-top:18px;">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true" style="font-size:20px">×</span>
+    </button>    <strong>Success!</strong> {{message}}
+  </div>
+  {% elif message_color == 'red' %}
+  <div class="alert alert-danger fade in alert-dismissible show" style="margin-top:18px;">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true" style="font-size:20px">×</span>
+    </button>    <strong>Error!</strong> {{message}}
+  </div>
+  {% endif %}
+  <table class="table table-borderless">
+    <tr>
+      <td style="text-align:right">
+        <div class="row">
+
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Total User</h5>
+                  <p class="card-text">{{total_user}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Applicant Income</h5>
+                  <p class="card-text"> {{applicant_income}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Coapplicant Income</h5>
+                  <p class="card-text"> {{coapplicant_income}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Total Eligilbe Candidates</h5>
+                  <p class="card-text"> {{eligible_user}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-2 col-md-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                  <h6 class="card-title">Total Not Eligible Candidates</h5>
+                  <p class="card-text"> {{not_eligible_user}}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align:right"><small class="text-muted">Last updated {{as_on}}</small></td>
+    </tr>
+    </table>
+  <table class="table table-hover">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">User</th>
+        <th scope="col">Loan ID</th>
+        <th scope="col">Gender</th>
+        <th scope="col">Education</th>
+        <th scope="col">Martital Status</th>
+        <th scope="col">Dependents</th>
+        <th scope="col">Self-Employed</th>
+        <th scope="col">Applicant Income</th>
+        <th scope="col">Coapplicant Income</th>
+        <th scope="col">Loan Amount</th>
+        <th scope="col">Loan Amount Terms<small>(in terms of days)</small></th>
+        <th scope="col">Credit History</th>
+        <th scope="col">Property Area</th>
+        <th scope="col">Loan Status</th>
+      </tr>
+    </thead>
+    {% if context %}
+    <tbody>
+      {% for context in context %}
+      <tr>
+        <th>{{ context.user }}</th>
+        <td>{{ context.loan_id }}</td>
+        <td>{{ context.gender }}</td>
+        <td>{{ context.education }}</td>
+        <td>{{ context.married }}</td>
+        <td>{{ context.dependents }}</td>
+        <td>{{ context.self_employed }}</td>
+        <td>{{ context.applicant_income }}</td>
+        <td>{{ context.coapplicant_income }}</td>
+        <td>{{ context.loanAmount }}</td>
+        <td>{{ context.loan_Amount_term }}</td>
+        <td>{{ context.credit_history }}</td>
+        <td>{{ context.property_area }}</td>
+        <td>{{ context.loan_status }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    {% else %}
+    <h1>There is Loan Detail of any User..</h1>
+    {% endif %}
+  </table>
+<br><br><br>
+{% endblock content %}
+
+<script>
+  {% block jquery %}
+  $('#yrly-contrib').DataTable();
+  {% endblock jquery %}
+</script>
+
+{% block ajaxcalls %}
+          {
+            url      : '/user/api/chart/data/{{ context.id }}',
+            data     : null,
+            callback : get_vals_and_set_chart
+          },
+{% endblock ajaxcalls %}
+
+{% block javascript %}
+  <script>
+
+    function get_monthly_contrib(year) {
+      console.log(year)
+      cgElem = document.getElementById("custom_growth")
+      var ep = '/user/api/get/users_contrib/{{context.id}}/' + year
+      data = {}
+      $.ajax({
+        method:"GET",
+        url:ep,
+        beforeSend: function () {
+          $("exampleModalLabel").html(year);
+          $("#divtoaddresult").html("Processing, please wait...");
+        },
+        success: function(data){
+          console.log(data)
+          $('#exampleModal').modal('show')
+          html_data = "<table class='table table-hover dt-responsive'><tr><th></th>"
+          for (i=0;i<data.headers.length;i++) {
+            html_data += "<th>"+data.headers[i]+"</th>"
+          }
+          html_data += "</tr>"
+          for(var key in data.vals) {
+            value = data.vals[key]
+	          console.log(key + " = " + value);
+            html_data += "<tr><th>" + key + "</th>"
+            for (i=0;i<value.length;i++) {
+              html_data += "<td>" + value[i] + "</td>"
+            }
+            html_data += "</tr>"
+
+          }
+          html_data += "</table>"
+          $("#divtoaddresult").html(html_data);
+          $('#exampleModal').modal('handleUpdate')
+          $("exampleModalLabel").text(year);
+        },
+        error: function(error_data){
+          console.log("error")
+          console.log(error_data)
+        }
+      })
+    }
+
+    function get_vals_and_set_chart(data) {
+      var debt_equity = [0, 0, 0]
+      var done_pending = [0, 0]
+      var debt_equity_labels = ['Debt', 'Equity', 'Gold', 'Cash']
+      var status_vals = [0, 0]
+      var status_labels = ['Achieved', 'Remaining']
+      var distribution_vals = [0, 0]
+      var distribution_labels = ['PPF', 'MF']
+      
+      console.log(data)
+      debt_equity = [data.debt, data.equity, data.gold, data.cash]
+      distribution_vals = data.distrib_vals
+      distribution_labels = data.distrib_labels
+      distribution_colors = data.distrib_colors
+      status_vals = [data.achieved, data.remaining]
+      console.log("debt_equity values")
+      console.log(debt_equity)
+      console.log("distribution_vals values")
+      console.log(distribution_vals)
+      console.log("status_vals values")
+      console.log(status_vals)
+
+      var ctx = document.getElementById('classificationChart').getContext('2d');
+      var config = {
+        type: 'pie',
+        data: {
+          datasets: [{
+            data: debt_equity,
+            backgroundColor: [
+              '#519463', '#a85b6a', '#ffd700', '#E3CA95'
+            ],
+            label: 'Classification'
+          }],
+          labels: debt_equity_labels
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio:false,
+          tooltips: {
+            callbacks: {
+              label: function(tooltipItem, data) {
+                var dataset = data.datasets[tooltipItem.datasetIndex];
+                var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+                  return previousValue + currentValue;
+                });
+                var currentValue = dataset.data[tooltipItem.index];
+                var percentage = Math.floor(((currentValue/total) * 100)+0.5);         
+                return data.labels[tooltipItem.index] + ": " + currentValue + ' (' + percentage + "%)";
+              }
+            }
+          }
+        }
+      };
+      var ctx2 = document.getElementById('distributionChart').getContext('2d');
+      var config2 = {
+        type: 'doughnut',
+        data: {
+          datasets: [{
+            data: distribution_vals,
+            backgroundColor: distribution_colors,
+            label: 'Distribution'
+          }],
+          labels: distribution_labels
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio:false,
+          tooltips: {
+            callbacks: {
+              label: function(tooltipItem, data) {
+                var dataset = data.datasets[tooltipItem.datasetIndex];
+                var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+                  return previousValue + currentValue;
+                });
+                var currentValue = dataset.data[tooltipItem.index];
+                var percentage = Math.floor(((currentValue/total) * 100)+0.5);         
+                return data.labels[tooltipItem.index] + ": " + currentValue + ' (' + percentage + "%)";
+              }
+            }
+          }
+        }
+      };
+      var ctx3 = document.getElementById('statusChart').getContext('2d');
+      var config3 = {
+        type: 'pie',
+        data: {
+          datasets: [{
+            data: status_vals,
+            backgroundColor: [
+              '#519463', '#a85b6a'
+            ],
+            label: 'Status'
+          }],
+          labels: status_labels
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio:false,
+          tooltips: {
+            callbacks: {
+              label: function(tooltipItem, data) {
+                var dataset = data.datasets[tooltipItem.datasetIndex];
+                var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+                  return previousValue + currentValue;
+                });
+                var currentValue = dataset.data[tooltipItem.index];
+                var percentage = Math.floor(((currentValue/total) * 100)+0.5);         
+                return data.labels[tooltipItem.index] + ": " + currentValue + ' (' + percentage + "%)";
+              }
+            }
+          }
+        }
+      };
+      var classificationChart = new Chart(ctx,config);
+      var distributionChart = new Chart(ctx2, config2);
+      var statusChart = new Chart(ctx3, config3);
+    }
+  </script>
+{% endblock javascript %}

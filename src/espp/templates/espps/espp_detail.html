@@ -1,0 +1,193 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}
+    <a style="padding-left:25px;" href="{% url 'espps:espp-add-sell-trans' object.id %}"><i class="fa fa-plus" aria-hidden="true" title="Add Sell Transaction" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:20px;" href="sell"><i class="far fa-file-alt" aria-hidden="true" title="Sell Transactions" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %}
+<ul class="breadcrumb">
+  <li><a href="{% url 'espps:espp-list' %}">ESPP</a></li>
+  <li><a href="#">{{ object.symbol }} / {{ object.purchase_date }}</a></li>
+</ul>
+{% endblock viewname %}
+
+{% block content %}
+<div class="card-deck">
+  <div class='card col-sm-12 col-md-6 col-lg-4' style="width:100%;height:50vh;box-shadow: 6px 6px 6px 6px #888888;">
+  <table class="paddingBetweenCols">
+    <tr>
+      <td>#</td>
+      <td>{{ object.id }}</td>
+    </tr>
+    <tr>
+      <td>Purchase Date</td>
+      <td>{{ object.purchase_date }}</td>
+    </tr>
+    <tr>
+      <td>Exchange</td>
+      <td>{{ object.exchange }}</td>
+    </tr>
+    <tr>
+      <td>Symbol</td>
+      <td>{{ object.symbol }}</td>
+    </tr>
+    <tr>
+      <td>Subscription FMV</td>
+      <td>{{ object.subscription_fmv }}</td>
+    </tr>
+    <tr>
+      <td>Purchase FMV</td>
+      <td>{{ object.purchase_fmv }}</td>
+    </tr>
+    <tr>
+      <td>Purchase Price</td>
+      <td>{{ object.purchase_price }}</td>
+    </tr>
+    <tr>
+      <td>Shares Purchased</td>
+      <td>{{ object.shares_purchased }}</td>
+    </tr>
+    <tr>
+      <td>Purchase Conversion Rate</td>
+      <td>{{ object.purchase_conversion_rate }}</td>
+    </tr>
+    <tr>
+      <td>Total Purchase Price</td>
+      <td>{{ object.total_purchase_price }}</td>
+    </tr>
+    <tr>
+      <td>User</td>
+      <td>{{ user_str }}</td>
+    </tr>
+    <tr>
+      <td>Goal</td>
+      <td>{{ goal_str }}</td>
+    </tr>
+    <tr>
+      <td>Latest Conversion Price</td>
+      <td>{{ object.latest_conversion_rate }}</td>
+    </tr>
+    <tr>
+      <td>Latest Price</td>
+      <td>{{ object.latest_price }}</td>
+    </tr>
+    <tr>
+      <td>Latest Value</td>
+      <td>{{ object.latest_value }}</td>
+    </tr>
+    <tr>
+      <td>As On Date</td>
+      <td>{{ object.as_on_date }}</td>
+    </tr>
+    <tr>
+      <td>Realised Gain</td>
+      <td>{{ object.realised_gain }}</td>
+    </tr>
+    <tr>
+      <td>Unrealised Gain</td>
+      <td>{{ object.unrealised_gain }}</td>
+    </tr>
+    <tr>
+      <td>ROI</td>
+      <td>{{ roi }}%</td>
+    </tr>
+  </table>
+  </div>
+  <!--div class='col-sm-1 col-md-1 col-lg-1'></div-->
+  <div id="tempChart" style="width:100%;height:50vh;box-shadow: 6px 6px 6px 6px #888888;" class='card col-sm-12 col-md-6 col-lg-4'>
+    <canvas id="myChart"></canvas>
+  </div>
+  <div id="compChart" style="width:100%;height:50vh;box-shadow: 6px 6px 6px 6px #888888;" class='card col-sm-12 col-md-6 col-lg-4'>
+    <canvas id="compare"></canvas>
+  </div>
+</div>
+  <!--br>
+  <table class="table table-hover dt-responsive" id="espp-sell-table" style="width:100%">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Transaction Date</th>
+        <th scope="col">Sell Price</th>
+        <th scope="col">Quantity</th>
+        <th scope="col">Total Price</th>
+        <th scope="col">Sell Conversion Price</th>
+        <th scope="col">Realised Gain</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for instance in transactions %}
+      <tr>
+        <td>{{ instance.id }}</th>
+        <td>{{ instance.trans_date }}</td>
+        <td>{{ instance.price }}</td>
+        <td>{{ instance.units }}</td>
+        <td>{{ instance.trans_price }}</td>
+        <td>{{ instance.conversion_rate }}</td>
+        <td>{{ instance.realised_gain }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table-->
+<br>
+{% endblock content %}
+
+
+<script>
+  {% block jquery %}
+  $('#espp-sell-table').DataTable();
+  var progressdata = {{progress_data|safe}}
+    if (!jQuery.isEmptyObject(progressdata)) {
+        setProgressChart(progressdata, {{labels|safe}})
+    }
+    function setProgressChart(progress_data, labels) {
+      var ctx = document.getElementById("myChart");
+      var config = {
+        type:    'line',
+        data:    {
+          datasets: progress_data
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio:false,
+          title:      {
+            display: true,
+            text:    "Progress"
+          },
+          scales:     {
+            xAxes: [{
+              type:       "time",
+              time:       {
+                format: 'YYYY-MM-DD',
+                tooltipFormat: 'll'
+              },
+              scaleLabel: {
+                display:     true,
+                labelString: 'Date'
+              }
+            }],
+            yAxes: [{
+              scaleLabel: {
+                display:     true,
+                labelString: 'Amount'
+              }
+            }]
+          }
+        }
+      };
+      var myChart = new Chart(ctx,config);
+    }
+  {% endblock jquery %}
+</script>
+
+{% block javascript %}
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
+  <script>
+  {%if comp_vals %}
+    set_comparision_chart({{my_vals|safe}}, {{comp_vals|safe}}, {{chart_labels|safe}}, "{{my_name}}", "{{comp_name}}")
+  {% endif %}
+  </script>
+{% endblock javascript %}

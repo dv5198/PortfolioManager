@@ -1,0 +1,161 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %} {% endblock applicableactions %} 
+
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %} 
+  <ul class="breadcrumb">
+    <li><a href="{% url 'bankaccounts:account-list' %}">Bank Accounts</a></li>
+    <li><a href="{% url 'bankaccounts:account-detail' account_id %}">{{number}}</a></li>
+    <li><a href="#">Add Transaction</a></li>
+  </ul>
+{% endblock viewname %}
+
+{% block content %}
+
+  <form method="POST">
+    {% csrf_token %}
+    <div class="row">
+      <div class='col-sm-6'>
+
+        {% if message_color == 'green' %}
+        <div class="alert alert-success fade in alert-dismissible show" style="margin-top:18px;">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+             <span aria-hidden="true" style="font-size:20px">×</span>
+           </button>    <strong>Success!</strong> {{message}}
+        </div>
+        {% elif message_color == 'red' %}
+        <div class="alert alert-danger fade in alert-dismissible show" style="margin-top:18px;">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+             <span aria-hidden="true" style="font-size:20px">×</span>
+           </button>    <strong>Error!</strong> {{message}}
+         </div>
+        {% endif %}
+         
+        <div class="form-group row">
+          <label for="number" class="col-sm-3 col-form-label">Account Number</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <label>{{number}}</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="company" class="col-sm-3 col-form-label">Bank Name</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <label>{{bank_name}}</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="trans_date" class="col-sm-3 col-form-label">Transaction Date</label>
+          <div class="col-sm-3">
+              <div class="md-form mt-0">
+                  <label>{{trans_date}}</label>
+              </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="nav" class="col-sm-3 col-form-label">Transaction Type</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <label>{{tran_type}}</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="trans_amount" class="col-sm-3 col-form-label">Transaction Amount</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <label>{{trans_amount}}</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="description" class="col-sm-3 col-form-label">Description</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <label>{{description}}</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="nav" class="col-sm-3 col-form-label">Sub Transaction Type</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select name="tran_sub_type" id="id_tran_sub_type">
+                <option value="">---------</option>
+                <option value="Card Payment">Card Payment</option>
+                <option value="Interest">Interest</option>
+                <option value="Shopping">Shopping</option>
+                <option value="EMI/Loan Payment">EMI/Loan Payment</option>
+                <option value="Fuel">Fuel</option>
+                <option value="Other">Other</option>
+                <option value="Groceries">Groceries</option>
+                <option value="Rent">Rent</option>
+                <option value="Medical">Medical</option>
+                <option value="Charity">Charity</option>
+                <option value="Investment">Investment</option>
+                <option value="Child Education">Child Education</option>
+                <option value="Vacation">Vacation</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="Utility">Utility</option>
+                <option value="Gift">Gift</option>
+                <option value="Salary/Payment">Salary/Payment</option>
+                <option value="Insurance">Insurance</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="notes" class="col-sm-3 col-form-label">Notes</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <textarea name="notes" rows="5" cols="20">{{notes|safe}}</textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <div class="col-sm-6">
+            <div class="md-form mt-0">
+              <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+              <a href="{% url 'bankaccounts:get-transactions' account_id %}" class="btn btn-danger" role="button">Cancel</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+{% endblock content %}
+
+
+{% block javascript %}
+  <script>
+    set_category('{{category|safe}}')
+    function set_category(cat) {
+      var categories = document.getElementById('id_tran_sub_type');
+      Array.from(document.querySelector("#id_tran_sub_type").options).forEach(function(option_element) {
+        let option_text = option_element.text;
+        let option_value = option_element.value;
+        let is_option_selected = option_element.selected;
+        if (cat == option_value) {
+          option_element.selected = true;
+        } else {
+          console.log(option_value)
+          console.log(cat)
+        }
+      });
+    }
+  </script>
+{% endblock %}

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <style>
+        .btn-group.custom_btn.mr-2{
+          margin-right: 3.2rem !important;
+      }
+      .navigation {
+        overflow: auto !important;
+        overflow-x: hidden !important;
+      } 
+      .main.deactive {
+          margin-left: 220px !important;
+      }
+      .navigation.active {
+        width: 220px !important;
+      }
+      .navigation ul li a {
+        position: relative;
+        display: block;
+        width: 100%;
+        display: flex;
+        text-decoration: none;
+        color: #fff;
+    }
+
+    </style>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.23/b-1.6.5/b-colvis-1.6.5/b-html5-1.6.5/b-print-1.6.5/fh-3.1.7/datatables.min.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/font-awesome-animation@0.2.1/dist/font-awesome-animation.min.css">
+
+    <link rel='stylesheet' href='https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css'>
+    <link rel='stylesheet' href='https://cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap4.min.css'>
+
+    {% load static %}
+    <link rel="icon" href="{% static 'favicon.ico' %}" />
+{% block style %}
+{% endblock style %}
+{% block extrastyle %}
+  {% load static %}
+  {{ block.super }}<link rel="stylesheet" type="text/css" href="{% static 'override.css' %}" />
+{% endblock %}
+    <title>Portfolio Manager</title>
+  </head>
+  <body>
+    {% load static %}
+    <div class="navigation">
+      <ul>
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-toggle="modal" data-target="#myModal">
+            <span class="icon"><img src="{% static 'favicon.ico' %}" height="20" width="24" class="fas" id="id_pm_img"></span>
+            <span class="title">PortfolioManager</span>
+          </a>
+        </li>
+        <div class="dropdown-divider"></div>
+        <li class="nav-item" id="id_dashboard_module">
+          <a class="nav-link" href="/dashboard" title="Dashboard">
+            <span class="icon"><i class="fas fa-fw fa-home"></i></span>
+            <span class="title">Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item" id="id_user_module">
+          <a class="nav-link" href="/user" title="Users"> 
+            <span class="icon"><i class="fas fa-users fa-fw"></i></span>
+            <span class="title">Users</span>
+          </a>
+        </li>
+        <li class="nav-item" id="id_goal_module">
+          <a class="nav-link" href="/goal" title="Goals"> 
+            <span class="icon"><i class="fas fa-bullseye fa-fw"></i></span>
+            <span class="title">Goals</span>
+          </a>
+        </li>
+        <div class="dropdown-divider"></div>
+        <li class="nav-item" id="id_fd_module">
+          <a class="nav-link" href="/fixed-deposit" title="Fixed Deposit">
+            <span class="icon"><i class="fas fa-hand-holding-usd"></i></span>
+            <span class="title">Fixed Deposits</span>
+          </a>
+        </li>
+        <li class="nav-item" id="id_ppf_module">
+          <a class="nav-link" href="/ppf" title="Public Provident Fund">
+            <span class="icon"><i class="fas fa-piggy-bank fa-fw"></i></span>
+            <span class="title">PPF</span>
+          </a>
+        </li>
+
+       
+        <li class="nav-item" id="id_insurance_module">
+          <a class="nav-link" href="/insurance" title="Insurance">
+            <span class="icon"><i class="fas fa-shield-alt"></i></span>
+            <span class="title">Insurance</span>
+          </a>
+        </li>
+        <li class="nav-item" id="id_shares_module">
+          <a class="nav-link" href="/shares" title="Shares">
+            <span class="icon"><i class="fas fa-chart-line fa-fw"></i></span>
+            <span class="title">Shares</span>
+          </a>
+        </li>
+        <li class="nav-item" id="id_mf_module">
+          <a class="nav-link" href="/mutualfunds" title="Mutual Funds">
+            <span class="icon"><i class="fas fa-donate"></i></span>
+            <span class="title">Mutual Funds</span>
+          </a>
+        </li>
+        <li class="nav-item" id="id_gold_module">
+          <a class="nav-link" href="/gold" title="Gold">
+            <span class="icon"><i class="fas fa-coins fa-fw" ></i></span>
+            <span class="title">Gold</span>
+          </a>
+        </li>
+        <li class="nav-item" id="id_bank_acc_module">
+          <a class="nav-link" href="/bankaccounts" title="Cash">
+            <span class="icon"><i class="	fas fa-wallet" ></i></span>
+            <span class="title">Cash</span>
+          </a>
+        </li>
+        <li class="nav-item" id="id_bank_acc_module">
+          <a class="nav-link" href="/loan" title="Cash">
+            <span class="icon"><i class="fas fa-money-bill fa-fw" ></i></span>
+            <span class="title">Loan</span>
+          </a>
+        </li>
+        <div class="dropdown-divider"></div>
+        <li class="nav-item" id="id_reports_module">
+          <a class="nav-link" href="/reports" title="Reports">
+            <span class="icon"><i class="fas fa-file-invoice"></i></span>
+            <span class="title">Reports</span>
+          </a>
+        </li>
+        {% comment %} <li class="nav-item" id="id_internals_module">
+          <a class="nav-link" href="/common" title="Internals">
+            <span class="icon"><i class="fas fa-tools fa-fw"></i></span>
+            <span class="title">Internals</span>
+          </a>
+        </li> {% endcomment %}
+      
+        <li class="nav-item" id="id_calculator_module">
+          <a class="nav-link" href="/calculator" title="Calculator">
+            <span class="icon"><i class="fas fa-calculator fa-fw"></i></span>
+            <span class="title">Calculators</span>
+          </a>
+        </li>
+        <li class="nav-item" id="id_markets_module">
+          <a class="nav-link" href="/markets" title="Markets">
+            <span class="icon"><i class="fas fa-balance-scale-left"></i></span>
+            <span class="title">Markets</span>
+          </a>
+        </li>
+        {% comment %} <li class="nav-item" id="id_tax_module">
+          <a class="nav-link" href="/tax" title="Tax">
+            <span class="icon"><img src="{% static 'tax.png' %}" height="20" width="24" class="fas"></span>
+            <span class="title">Tax</span>
+          </a>
+        </li> {% endcomment %}
+      </ul>
+    </div>
+
+    <div class="toggle" id="toggleMenu" onclick="toggleMenu()">
+      <i class="fas fa-solid fa-bars" id="bars-toggle" style="font-size: 2em;"></i>
+    </div>
+
+    <div class="logo">
+      <!-- The Modal -->
+      <div id="myModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <img src="{% static 'PortfolioManager.png' %}" height="100" width="260" alt="PortfolioManager">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+              <div class="row" >
+                <i class="far fa-hand-paper faa-wrench animated" style="font-size: 1.4em;padding: 0px 0px 0px 15px;"></i>&nbsp;<h5>Hello !!!</h5>
+              </div>
+              <br>
+              <div>This software is in its pre-alpha version.  Please support by contributing/reporting bugs. </div><br>
+              <div class="row">
+                <div class="col-sm-12 col-lg-12 col-md-12"><a href="https://github.com/krishnakuruvadi/portfoliomanager" target="_blank"><i class="fab fa-github" style="font-size: 1.2em;"></i>&nbsp;&nbsp;Link to the code</a></div>
+                <div class="col-sm-12 col-lg-12 col-md-12"><a href="https://www.buymeacoffee.com/kkuruvadi" target="_blank"><img src="https://camo.githubusercontent.com/c3f856bacd5b09669157ed4774f80fb9d8622dd45ce8fdf2990d3552db99bd27/68747470733a2f2f7777772e6275796d6561636f666665652e636f6d2f6173736574732f696d672f637573746f6d5f696d616765732f6f72616e67655f696d672e706e67" alt="&quot;Buy Me A Coffee&quot;" data-canonical-src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" style="max-width:100%;"></a></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="main">      
+      <div class="container" style=" padding: 1px 1px 1px 1px;">
+        <div id="carouselExampleSlidesOnly" class="carousel slide" data-ride="carousel">
+          <div class="carousel-inner" id="carousel-scroll-me">
+          
+          </div>
+        </div>
+      </div>
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3"  style="height: 60px;background: rgb(238, 235, 235);display: block;padding: 0px 0px 0px 0px;margin:0px 0px 0px 0px;">
+        {% block viewname %} replace me {% endblock %}
+        <div class="btn-toolbar mb-2 mb-md-0">
+          <div class="btn-group custom_btn mr-2">
+            {% block applicableactions %} 
+            {% endblock applicableactions %}
+            <a href="/alerts" style="padding-left:15px;"><i class="far fa-bell" aria-hidden="true" title="Alerts" style="font-size: 1.2em;"></i><sup id='alert-count'>0</sup></a>
+          </div>
+        </div>
+      </div>
+      {% block canvas %}
+        <div style="width:100%;height:80vh;">
+          <canvas id="myChart"></canvas>
+        </div>
+        
+      {% endblock canvas %}
+      
+      {% block content %} replace me {% endblock %}
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="   crossorigin="anonymous"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"> </script>
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.23/b-1.6.5/b-colvis-1.6.5/b-html5-1.6.5/b-print-1.6.5/fh-3.1.7/datatables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.9.0/feather.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.js"></script>
+    
+    <script src='https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js'></script>
+    <script src='https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js'></script>
+    <script src='https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js'></script>
+    <script src='https://cdn.datatables.net/responsive/2.2.9/js/responsive.bootstrap4.min.js'></script>
+
+    <script type="text/javascript">
+      function toggleMenu() {
+        console.log('inside toggle menu');
+        let navigation = document.querySelector('.navigation');
+        let toggle = document.querySelector('.toggle');
+        navigation.classList.toggle('active');
+        toggle.classList.toggle('active');
+        let main = document.querySelector('.main');
+        main.classList.toggle('deactive');
+        let logo = document.querySelector('.logo');
+        logo.classList.toggle('deactive');
+        console.log(logo.classList);
+        if (logo.classList.value.includes('deactive')) {
+          document.getElementById("toggleMenu").innerHTML='<i class="fas fa-times" id="bars-toggle" style="font-size: 2em;"></i>';
+        } else {
+          document.getElementById("toggleMenu").innerHTML='<i class="fas fa-bars" id="bars-toggle" style="font-size: 2em;"></i>';
+        }
+      }
+    </script>
+    {% block scriptlibrary %}{% endblock scriptlibrary %}
+    <script> 
+      $(document).ready(function(){
+        const alertSocket = new WebSocket(
+            'ws://' +
+            window.location.host +
+            '/ws/alerts/'
+        );
+        alertSocket.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            //console.log(data)
+            var el = document.getElementById('alert-count');
+            el.innerHTML = `${data.count}`;
+        }
+        alertSocket.onopen = function(e) {
+          //console.log("Socket connected; asking for alert count");
+          alertSocket.send("giveAlertCount");
+        }
+      });
+      $(document).ready(function(){
+        {% block jquery %}{% endblock jquery %}
+      });
+      function scroll_data_periodic() {
+
+        var scroll_data_api = '/common/api/get/scrolldata'
+        $.ajax({
+          method: "GET",
+          url: scroll_data_api,
+          success: function(data){
+            scroll_data_first(data);
+          },
+          error: function(error_data){
+            console.log("error")
+            console.log(error_data)
+          }
+        })
+        setTimeout(scroll_data_periodic, 60000);
+      }
+      
+      {% comment %} function scroll_data_first(data) {
+        var items = data['scroll_data'];
+        var sc = '';
+        for(i=0;i<items.length;i++){
+          if (i%5==0){
+            if(i==0) {
+              sc = sc + '<div class="carousel-item active"><div class="Row" style="display: table;border-spacing: 10px;">'; // carousel item
+            } else {
+              sc = sc + '<div class="carousel-item"><div class="Row" style="display: table;border-spacing: 10px;">'; // carousel item
+            }
+          }
+          if (items[i]['change'] < 0) {
+            sc = sc + '<div class="Column" style=" display: table-cell;border: 2px solid red;border-radius: 25px;padding: 1px; ">' // each index
+          } else {
+            sc = sc + '<div class="Column" style=" display: table-cell;border: 2px solid green;border-radius: 25px;padding: 1px;">' // each index
+          }
+
+          sc = sc + '<div class="Row" style="display: table;border-spacing: 2px;padding: 0 2px 0 2px;"><div class="Column" style=" display: table-cell;">'; // outer row column of each index
+
+          sc = sc + '<div class="Row" style="display: table;border-spacing: 2px;padding: 0 2px 0 2px;"><div class="Column" style=" display: table-cell;"><strong><small>' + items[i]['scrip'] + '</small></strong></div></div>';
+
+          sc = sc + '<div class="Row" style="display: table;border-spacing: 2px;padding: 0 2px 0 2px;"><div class="Column" style=" display: table-cell;"><small>'; // row with val, change and change percent
+          sc = sc + items[i]['val'].toString() + '\xa0\xa0';
+          sc = sc + items[i]['change'].toString() + '\xa0(' + items[i]['percent'].toString() +'%)\xa0'
+
+          sc = sc + '</small></div></div>'; // row with val, change and change percent end
+          sc = sc + '<div class="Row" style="display: table;border-spacing: 2px;padding: 0 2px 0 2px;"><div class="Column" style=" display: table-cell;">'+'<small>As On ' + items[i]['last_updated'] + '</small></div></div>';
+
+
+          sc = sc + '</div></div>'; // outer row column of each index end
+
+          sc = sc + '</div>' // each index end
+          if (i%5==4){
+            sc = sc + '</div></div>'; // carousel item end
+          }
+        }
+        //console.log(sc)
+        var el = document.getElementById('carousel-scroll-me');
+        el.innerHTML = sc;
+      } {% endcomment %}
+
+      {% comment %} function set_current_module_view(module_id) {
+        //console.log('module_id ' + module_id);
+        if (module_id == '') {
+          return;
+        }
+        var el = document.getElementById(module_id);
+        if (el != null) {
+          el.classList.add('active');
+        }
+      } {% endcomment %}
+
+      {% comment %} $(document).ready(function(){
+        //setup an array of AJAX options,
+        //each object will specify information for a single AJAX request
+        var ajaxes  = [
+          {% block ajaxcalls %}{% endblock ajaxcalls %}
+          {
+              url      : '/common/api/get/scrolldata',
+              data: null,
+              callback : scroll_data_first
+          }
+        ],
+        current = 0;
+
+         //declare your function to run AJAX requests
+        function do_ajax() {
+          //check to make sure there are more requests to make
+          if (current < ajaxes.length) {
+            //make the AJAX request with the given info from the array of objects
+            $.ajax({
+                url      : ajaxes[current].url,
+                data     : ajaxes[current].data,
+                success  : function (serverResponse) {
+
+                    //once a successful response has been received,
+                    //no HTTP error or timeout reached,
+                    //run the callback for this request
+                    ajaxes[current].callback(serverResponse);
+
+                },
+                complete : function () {
+
+                    //increment the `current` counter
+                    //and recursively call our do_ajax() function again.
+                    current++;
+                    do_ajax();
+
+                    //note that the "success" callback will fire
+                    //before the "complete" callback
+
+                }
+            });
+          }
+        } 
+        set_current_module_view('{{curr_module_id|safe}}');
+        //run the AJAX function for the first time once `document.ready` fires
+        do_ajax();
+        setTimeout(scroll_data_periodic, 60000);
+      }); {% endcomment %}
+
+      
+    </script>
+
+  {% block javascript %}{% endblock %}
+
+  
+  </body>
+</html>

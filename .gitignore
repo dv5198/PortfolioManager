@@ -1,0 +1,9 @@
+chromedriver
+src/db.sqlite3
+src/huey.db
+src/huey.db-shm
+src/huey.db-wal
+src/media/secrets/
+venv
+environment
+.vscode

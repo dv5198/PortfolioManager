@@ -1,0 +1,56 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}
+    <a href="../upload-transactions"><i class="fa fa-upload" aria-hidden="true" title="Upload Transactions" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;" href="../add-transaction"><i class="fa fa-plus" aria-hidden="true" title="Add Transaction" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %}
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'ssys:ssy-list' %}">SSY</a></li>
+    <li><a href="{% url 'ssys:ssy-detail' ssy_num %}">{{ssy_num}}</a></li>
+    <li><a href="#">Transactions</a></li>
+  </ul>
+{% endblock %} 
+
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+    <table class="table table-hover dt-responsive" id="trans-table" style="width:100%">
+        <thead class="thead-dark">
+            <tr>
+            <th scope="col">#</th>
+            <th scope="col">Transaction Date</th>
+            <th scope="col">Notes</th>
+            <th scope="col">Reference</th>
+            <th scope="col">Type</th>
+            <th scope="col">amount</th>
+            <th scope="col">Interest Component</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for instance in object_list %}
+                <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ instance.trans_date }}</td>
+                <td>{{ instance.notes }}</td>
+                <td>{{ instance.reference }}</td>
+                <td>{{ instance.entry_type }}</td>
+                <td>{{ instance.amount }}</td>
+                <td>{{ instance.interest_component }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+<script>
+    {% block jquery %}
+        $('#trans-table').DataTable({
+            "columnDefs": [
+                { "type": "date", "targets": [1] }
+            ],
+            "order": [[ 1, "desc" ]]
+        });
+    {% endblock jquery %}
+</script>

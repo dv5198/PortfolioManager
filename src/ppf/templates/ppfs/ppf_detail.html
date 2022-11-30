@@ -1,0 +1,163 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}
+    <a href="upload-transactions"><i class="fa fa-upload" aria-hidden="true" title="Upload Transactions" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:25px;" href="add-transaction"><i class="fa fa-plus" aria-hidden="true" title="Add Transaction" style="font-size: 1.2em;"></i></a>
+    <a style="padding-left:20px;" href="transactions"><i class="far fa-file-alt" aria-hidden="true" title="Transactions" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'ppfs:ppf-list' %}">PPFs</a></li>
+    <li><a href="#">{{ object.number }}</a></li>
+  </ul>
+{% endblock viewname %}
+
+{% block content %}
+  <table class="table table-borderless" style="width:50%">
+    <tr>
+      <td>Number</td>
+      <td>{{ object.number }}</td>
+    </tr>
+    <tr>
+      <td>Start Date</td>
+      <td>{{ object.start_date }}</td>
+    </tr>
+    <tr>
+      <td>User</td>
+      <td>{{ user_str }}</td>
+    </tr>
+    <tr>
+      <td>Goal</td>
+      <td>{{ goal_str }}</td>
+    </tr>
+    <tr>
+      <td>Principal</td>
+      <td>{{ object.contribution }}</td>
+    </tr>
+    <tr>
+      <td>Interest</td>
+      <td>{{ object.interest_contribution }}</td>
+    </tr>
+    <tr>
+      <td>Total</td>
+      <td>{{ object.total }}</td>
+    </tr>
+    <tr>
+      <td>ROI</td>
+      <td>{{ roi }} %</td>
+    </tr>
+  </table>
+
+  <div class='col-sm-6 col-md-4 col-lg-4' style="width:95%;height:45vh">
+    <canvas id="myChart"></canvas>
+  </div>
+{% endblock content %}
+
+
+{% block ajaxcalls %}
+          {
+            url      : '/ppf/api/chart/data/{{ object.number }}',
+            data     : null,
+            callback : setChart
+          },
+{% endblock ajaxcalls %}
+
+
+{% block javascript %}
+<script>
+  function setChart(data) {
+    var principal_values = []
+    var interest_values = []
+    var bal_values = []
+    console.log(data)
+    principal_values = data.ppf_trans_principal
+    interest_values = data.ppf_trans_interest
+    bal_values = data.ppf_trans_bal
+    exp_bal_values = data.ppf_exp_bal
+    exp_principal_values = data.ppf_exp_principal
+    exp_interest_values = data.ppf_exp_interest
+    console.log("principal values")
+    console.log(principal_values)
+    console.log("interest values")
+    console.log(interest_values)
+    console.log("balance values")
+    console.log(bal_values)
+  
+    var ctx = document.getElementById("myChart");
+    var config = {
+      type:    'line',
+      data:    {
+        datasets: [
+          {
+            label: "Balance",
+            data: bal_values,
+            fill: false,
+            borderColor: 'green'
+          },
+          {
+            label: "Principal",
+            data: principal_values,
+            fill: false,
+            borderColor: 'red'
+          },
+          {
+            label: "Interest",
+            data:  interest_values,
+            fill:  false,
+            borderColor: 'blue'
+          },
+          {
+            label: "Projected Principal",
+            data: exp_principal_values,
+            fill: true,
+            borderColor: 'red'
+          },
+          {
+            label: "Projected Interest",
+            data:  exp_interest_values,
+            fill:  true,
+            borderColor: 'blue'
+          },
+          {
+            label: "Projected Balance",
+            data:  exp_bal_values,
+            fill:  true,
+            borderColor: 'green'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio:false,
+        title:      {
+          display: true,
+          text:    "PPF"
+        },
+        scales:     {
+          xAxes: [{
+            type:       "time",
+            time:       {
+              format: 'YYYY-MM-DD',
+              tooltipFormat: 'll'
+            },
+            scaleLabel: {
+              display:     true,
+              labelString: 'Date'
+            }
+          }],
+          yAxes: [{
+            scaleLabel: {
+              display:     true,
+              labelString: 'Amount'
+            }
+          }]
+        }
+      }
+    };
+    var myChart = new Chart(ctx,config); 
+  }
+</script>
+{% endblock javascript %}

@@ -1,0 +1,108 @@
+{% extends 'base.html' %} 
+{% load template_filters %}
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="#">Internals of Portfolio Manager </a></li>
+  </ul>
+{% endblock %} 
+
+{% block applicableactions %} {% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+
+<div class="row">
+  <div class='col-sm-1'></div>
+  <div class="card" style="width: 18rem;">
+    <div class="card-body">
+      <h5 class="card-title">Admin</h5>
+      <h6 class="card-subtitle mb-2 text-muted">Admin View</h6>
+      <p class="card-text">Default Django Admin view to make modifications to db. Needs login</p>
+      <a href="../admin" class="card-link">Admin</a>
+    </div>
+  </div>
+  <div class='col-sm-1'></div>
+  <div class="card" style="width: 18rem;">
+    <div class="card-body">
+      <h5 class="card-title">Stocks</h5>
+      <h6 class="card-subtitle mb-2 text-muted">All stocks being tracked</h6>
+      <p class="card-text">View of all historical data collected for stocks being tracked.</p>
+      <a href="stocks" class="card-link">Stocks</a>
+    </div>
+  </div>
+  <div class='col-sm-1'></div>
+  <div class="card" style="width: 18rem;">
+    <div class="card-body">
+      <h5 class="card-title">Mutual Funds</h5>
+      <h6 class="card-subtitle mb-2 text-muted">All Mutual Funds being tracked</h6>
+      <p class="card-text">View of all historical data collected for mutual funds being tracked.</p>
+      <a href="mf" class="card-link">Mutual Funds</a>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class='col-sm-1'>&nbsp;</div>
+</div>
+<div class="row">
+  <div class='col-sm-1'></div>
+  <div class="card" style="width: 18rem;">
+    <div class="card-body">
+      <h5 class="card-title">Tasks</h5>
+      <h6 class="card-subtitle mb-2 text-muted">All Available Tasks</h6>
+      <p class="card-text">Details of tasks (run periodically or based on user interaction) like last run, last run result etc.  All these tasks can be run from here if required</p>
+      <a href="../tasks" class="card-link">Tasks</a>
+    </div>
+  </div>
+  <div class='col-sm-1'></div>
+  <div class="card" style="width: 18rem;">
+    <div class="card-body">
+      <h5 class="card-title">Preferences</h5>
+      <h6 class="card-subtitle mb-2 text-muted">Edit Preferences</h6>
+      <p class="card-text">Edit preferences like timezone</p>
+      <a href="preferences" class="card-link">Preferences</a>
+    </div>
+  </div>
+  <div class='col-sm-1'></div>
+  <div class="card" style="width: 18rem;">
+    <div class="card-body">
+      <h5 class="card-title">Passwords</h5>
+      <h6 class="card-subtitle mb-2 text-muted">Stored Passwords</h6>
+      <p class="card-text">View and edit stored passwords</p>
+      <a href="passwords" class="card-link">Passwords</a>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class='col-sm-1'>&nbsp;</div>
+</div>
+<div class="row">
+  <div class='col-sm-1'></div>
+  <div class="card" style="width: 18rem;">
+    <div class="card-body">
+      <h5 class="card-title">Indices</h5>
+      <h6 class="card-subtitle mb-2 text-muted">All Indices being tracked</h6>
+      <p class="card-text"> View of all historical data collected for stocks being tracked.</p>
+      <a href="indices" class="card-link">Indices</a>
+    </div>
+  </div>
+  <div class='col-sm-1'></div>
+  <div class="card" style="width: 18rem;">
+    <div class="card-body">
+      <!--h5 class="card-title">Preferences</h5>
+      <h6 class="card-subtitle mb-2 text-muted">Edit Preferences</h6>
+      <p class="card-text">Edit preferences like timezone</p>
+      <a href="preferences" class="card-link">Preferences</a-->
+    </div>
+  </div>
+  <div class='col-sm-1'></div>
+  <div class="card" style="width: 18rem;">
+    <div class="card-body">
+      <!--h5 class="card-title">Passwords</h5>
+      <h6 class="card-subtitle mb-2 text-muted">Stored Passwords</h6>
+      <p class="card-text">View and edit stored passwords</p>
+      <a href="passwords" class="card-link">Passwords</a-->
+    </div>
+  </div>
+</div>
+<br>
+{% endblock %}

@@ -1,0 +1,277 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}
+<div class="btn-toolbar mb-2 mb-md-0">
+    <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <span data-feather="calendar"></span>
+      Interval
+      <div class="dropdown-menu" id="chart_interval">
+        <a class="dropdown-item" href="#" id="action-month">1 Month</a>
+        <a class="dropdown-item" href="#" id="action-3month">3 Months</a>
+        <a class="dropdown-item" href="#" id="action-6month">6 Months</a>
+        <a class="dropdown-item" href="#" id="action-1year">1 Year</a>
+        <a class="dropdown-item" href="#" id="action-2year">2 Years</a>
+        <a class="dropdown-item" href="#" id="action-3year">3 Years</a>
+        <a class="dropdown-item" href="#" id="action-5year">5 Years</a>
+        <a class="dropdown-item" href="#" id="action-ytd">YTD</a>
+        <a class="dropdown-item" href="#" id="action-all">Max</a>
+      </div>
+    </button>
+  </div>
+{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'markets:markets-home' %}">Markets</a></li>
+    <li><a href="#">PE Ratio</a></li>
+  </ul> 
+{% endblock viewname %}
+
+{% block content %}
+
+  <table class="table table-borderless">
+    <tr>
+      <td><ul class="nav nav-pills">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'markets:markets-home' %}">Markets</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="#">Valuation</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'markets:news-view' %}">News</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'markets:returns-view' %}">Returns</a>
+        </li>
+      </ul></td>
+    </tr>
+    <tr></tr>
+  </table>
+  <div class="card-deck">
+    <div class="card" style="width:100%;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+      <p>The price-to-equity <b>P/E ratio</b> shows what the market is willing to pay today for a stock based on its past or future earnings. A high P/E could mean that a stock's price is high relative to earnings and possibly overvalued. Conversely, a low P/E might indicate that the current stock price is low relative to earnings.
+        <a href="https://www.investopedia.com/terms/p/price-earningsratio.asp" target="_blank">For more <i class="fas fa-external-link-alt"></i></a>
+      </p>
+      <p>The price-to-book <b>P/B Ratio</b> compares a company's market value to its book value. The market value of a company is its share price multiplied by the number of outstanding shares. The book value is the net assets of a company.
+          In other words, if a company liquidated all of its assets and paid off all its debt, the value remaining would be the company's book value.
+          Overvalued growth stocks frequently show a combination of low ROE and high P/B ratios. If a company's ROE is growing, its P/B ratio should also be growing.  High-growth companies will often show price-to-book ratios well above 1.0, whereas companies facing severe distress will occasionally show ratios below 1.0.
+          <a href="https://www.investopedia.com/terms/p/price-to-bookratio.asp" target="_blank">For more<i class="fas fa-external-link-alt"></i></a>
+      </p>
+    </div>
+    <div class="card" style="width:100%;box-shadow: 2px 4px #888888;" class="col-sm-12 col-md-6 col-lg-4">
+      <table class="table">
+        <tr>
+          <th>
+            Nifty PE Ratio Range
+          </th>
+          <th>
+            Valuation
+          </th>
+          <th>
+            Nifty PB Ratio Range
+          </th>
+        </tr>
+        <tr>
+          <td>25-30</td>
+          <td>Very Expensive. Better to sell</td>
+          <td>>4.5</td>
+        </tr>
+        <tr>
+          <td>20-25</td>
+          <td>Expensive. Book partial profits</td>
+          <td>3.25-4.5</td>
+        </tr>
+        <tr>
+          <td>15-20</td>
+          <td>Average. Buy or Hold</td>
+          <td>2.75-3.25</td>
+        </tr>
+        <tr>
+          <td>12-15</td>
+          <td>Cheap. Buy a lot</td>
+          <td>2-2.75</td>
+        </tr>
+        <tr>
+          <td>&lt;12</td>
+          <td>Very Cheap. Buy like crazy</td>
+          <td>&lt;2</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  <br>
+
+    {% if pe_vals %}
+        <div>
+            {% for key, value in pe_vals.items %}
+            <div style="text-align:center; margin: 70px 0px 0px 0px;font-weight: bold;">{{key}}</div>
+            <div class="row">
+                <div class='col-sm-6' style='width:95%;height:50vh'>
+                    <canvas id="{{key}}_pe_chart"></canvas>
+                </div>
+                <div class='col-sm-6' style='width:95%;height:50vh'>
+                    <canvas id="{{key}}_pb_chart"></canvas>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        No Data found to display
+    {% endif %}
+{% endblock content %}
+
+{% block scriptlibrary %}
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@1.0.0-alpha4/dist/chartjs-chart-matrix.min.js"></script>
+{% endblock scriptlibrary %}
+
+<script>
+    {% block jquery %}
+    var pe_vals = {{pe_vals|safe}}
+    console.log(pe_vals)
+    for (x in pe_vals) {
+        pe = pe_vals[x];
+        setPEChart(x, pe);
+    }
+    var pb_vals = {{pb_vals|safe}}
+    console.log(pb_vals)
+    for (x in pb_vals) {
+        pb = pb_vals[x];
+        setPBChart(x, pb);
+    }
+    document.getElementById("action-month").addEventListener ("click", function(){updateInterval(1)}, false);
+    document.getElementById("action-3month").addEventListener ("click", function(){updateInterval(3)}, false);
+    document.getElementById("action-6month").addEventListener ("click", function(){updateInterval(6)}, false);
+    document.getElementById("action-1year").addEventListener ("click", function(){updateInterval(12)}, false);
+    document.getElementById("action-2year").addEventListener ("click", function(){updateInterval(24)}, false);
+    document.getElementById("action-3year").addEventListener ("click", function(){updateInterval(36)}, false);
+    document.getElementById("action-5year").addEventListener ("click", function(){updateInterval(60)}, false);
+    document.getElementById("action-ytd").addEventListener ("click", function(){updateInterval(0)}, false);
+    document.getElementById("action-all").addEventListener ("click", function(){updateInterval(-1)}, false);
+
+    function updateInterval(duration) {
+      console.log(duration)
+
+      var today = new Date();
+      var from_date = "none"
+      if (duration == 0) {
+        let year = today.getFullYear()
+        from_date = [year, 1, 1].join('-')
+      }
+      if (duration > 0) {
+        let year = today.getFullYear()
+        let month = today.getMonth() + 1
+        while (duration > 0) {
+          month = month -1
+          if (month == 0) {
+            month = 12
+            year = year - 1
+          }
+          duration = duration -1
+        }
+        from_date = [year, month, 1].join('-')
+      }
+
+      Chart.helpers.each(Chart.instances, function(instance){
+        console.log(instance);
+        instance.options.scales.xAxes[0].time.min = from_date;
+        instance.update();
+      });
+      return false;
+    }
+
+    function setPEChart(id, pe) {
+        console.log(pe);
+        var ctx = document.getElementById(id+'_pe_chart').getContext('2d');
+        var config = {
+            type:    'line',
+            data:    {
+                datasets: [
+                    {
+                    label: "PE",
+                    data: pe,
+                    fill: false,
+                    borderColor: '#92993c'
+                    },
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio:false,
+                title:      {
+                    display: true,
+                    text:    id + " PE Ratio"
+                },
+                scales:     {
+                    xAxes: [{
+                        type:       "time",
+                        time:       {
+                            format: 'YYYY/MM',
+                            tooltipFormat: 'll'
+                        },
+                        scaleLabel: {
+                            display:     true,
+                            labelString: 'Date'
+                        }
+                    }],
+                    yAxes: [{
+                        scaleLabel: {
+                            display:     true,
+                            labelString: 'Value'
+                        }
+                    }]
+                }
+            }
+        };
+        var myChart = new Chart(ctx,config);
+    }
+
+    function setPBChart(id, pb) {
+        console.log(pb);
+        var ctx = document.getElementById(id+'_pb_chart').getContext('2d');
+        var config = {
+            type:    'line',
+            data:    {
+                datasets: [
+                    {
+                    label: "PB",
+                    data: pb,
+                    fill: false,
+                    borderColor: '#92993c'
+                    },
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio:false,
+                title:      {
+                    display: true,
+                    text:    id + " PB Ratio"
+                },
+                scales:     {
+                    xAxes: [{
+                        type:       "time",
+                        time:       {
+                            format: 'YYYY/MM',
+                            tooltipFormat: 'll'
+                        },
+                        scaleLabel: {
+                            display:     true,
+                            labelString: 'Date'
+                        }
+                    }],
+                    yAxes: [{
+                        scaleLabel: {
+                            display:     true,
+                            labelString: 'Value'
+                        }
+                    }]
+                }
+            }
+        };
+        var myChart = new Chart(ctx,config);
+    }
+    {% endblock jquery %}
+</script>

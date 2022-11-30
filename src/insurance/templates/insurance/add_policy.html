@@ -1,0 +1,216 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %} {% endblock applicableactions %} 
+
+{% block canvas %}{% endblock canvas %}
+
+{% block viewname %} 
+  <ul class="breadcrumb">
+    <li><a href="{% url 'insurance:policy-list' %}">Insurance</a></li>
+    <li><a href="#">Create</a></li>
+  </ul>
+{% endblock viewname %}
+
+{% block content %}
+
+  <form method="POST">
+    {% csrf_token %}
+    <div class="row">
+      <div class='col-sm-6'>
+
+        {% if message_color == 'green' %}
+        <div class="alert alert-success fade in alert-dismissible show" style="margin-top:18px;">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+             <span aria-hidden="true" style="font-size:20px">×</span>
+           </button>    <strong>Success!</strong> {{message}}
+        </div>
+        {% elif message_color == 'red' %}
+        <div class="alert alert-danger fade in alert-dismissible show" style="margin-top:18px;">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+             <span aria-hidden="true" style="font-size:20px">×</span>
+           </button>    <strong>Error!</strong> {{message}}
+         </div>
+        {% endif %}
+
+        <div class="form-group row">
+          <label for="policy" class="col-sm-3 col-form-label">Policy Number <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="text" id="id_policy" name="policy" value="{{policy}}" required="true">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label class="control-label col-sm-3 col-form-label" for="id_policy_type">Policy Type</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select name="policy_type" required="" id="id_policy_type">
+                <option value="">---------</option>
+                <option value="Traditional">Traditional</option>
+                <option value="Term">Term</option>
+                <option value="ULIP">ULIP</option>
+                <option value="Health">Health</option>
+              </select>
+            </div>
+          </div> 
+        </div>
+        
+        <!--div class="form-group row">
+          <label for="fund" class="col-sm-3 col-form-label">Country<span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select name="country" required="" id="id_country">
+                <option value="India">India</option>
+                <option value="USA">USA</option>
+              </select>
+            </div>
+          </div>
+        </div-->
+
+        <div class="form-group row">
+          <label for="company" class="col-sm-3 col-form-label">Company <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select name="company" required="" id="id_company">
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row" class="col-sm-6 col-md-6 col-lg-6" id="id_div_company_other">
+          <label for="company_other" class="col-sm-3 col-form-label">Enter company name  <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="text" id="id_company_other" name="company_other" value="{{company_other}}">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="name" class="col-sm-3 col-form-label">Policy Name <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="text" id="id_name" name="name" value="{{name}}" required="true">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="start_date" class="col-sm-3 col-form-label">Start Date <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+              <div class="md-form mt-0">
+                  <input type="date" id="start_date" name="start_date" value="{{start_date}}" required="true">
+              </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="end_date" class="col-sm-3 col-form-label">End Date</label>
+          <div class="col-sm-3">
+              <div class="md-form mt-0">
+                  <input type="date" id="end_date" name="end_date" value="{{end_date}}">
+              </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="sum_assured" class="col-sm-3 col-form-label">Sum Assured</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <input type="number" step="1" id="sum_assured" name="sum_assured" value="{{sum_assured}}">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="user" class="col-sm-3 col-form-label">User <span style="color:red;">*</span></label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select id="id_user" name="user" class="form-control" required="true"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="goal" class="col-sm-3 col-form-label">Goal</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <select id="id_goal" name="goal" class="form-control"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="notes" class="col-sm-3 col-form-label">Notes</label>
+          <div class="col-sm-3">
+            <div class="md-form mt-0">
+              <textarea name="notes" rows="5" cols="20">{{notes}}</textarea>
+            </div>
+          </div>
+        </div>
+        <div class="form-group row">
+          <div class="col-sm-6">
+            <div class="md-form mt-0">
+              <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+              <a href="../" class="btn btn-danger" role="button">Cancel</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+{% endblock content %}
+
+
+{% block javascript %}
+  <!--script src="https://cdn.jsdelivr.net/gh/xcash/bootstrap-autocomplete@v2.3.7/dist/latest/bootstrap-autocomplete.min.js"></script-->
+  <!--script>
+    $('.basicAutoComplete').autoComplete(
+        {minLength: 1}
+    );
+    $('.dropdown-menu').css({'top': 'auto', 'left': 'auto'})
+
+  </script-->
+  {% load static %}
+  <script src="{% static 'common.js' %}"></script>
+
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script>
+    set_user_list({{users|safe}}, '{{user|safe}}');
+    set_company({{companies|safe}});
+    set_other_company_div();
+    $("#id_company").change(function () {
+      set_other_company_div();
+    });
+    function set_other_company_div() {
+      var sel = document.getElementById('id_company').value;
+      if (sel == 'Other') {
+        document.getElementById("id_div_company_other").style.display=null;
+        document.getElementById("id_company_other").required = true;
+      } else {
+        document.getElementById("id_div_company_other").style.display="none";
+        document.getElementById("id_company_other").required = false;
+      }
+    }
+    function set_company(companies) {
+      $('#id_company').empty();
+      $('#id_company')
+          .append($('<option>', { value : '' })
+          .text(''));
+      var dropdown = document.getElementById('id_company');
+      for (x in companies) {
+          company = companies[x]
+          // create new option element
+          var opt = document.createElement('option');
+          // create text node to add to option element (opt)
+          opt.appendChild( document.createTextNode(company) );
+          // set value property of opt
+          opt.value = company;
+          // add opt to end of select box (sel)
+          dropdown.appendChild(opt);
+      }
+    }
+  </script>
+{% endblock %}

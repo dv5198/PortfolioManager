@@ -1,0 +1,55 @@
+{% extends 'base.html' %} 
+{% load template_filters %}
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'common:common-list' %}">Internals</a></li>
+    <li><a href="#">Tasks</a></li>
+  </ul>
+{% endblock %} 
+
+{% block applicableactions %} {% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+
+  <table class="table table-hover table-condensed dt-responsive" id="tasks-table" style="width:100%">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Description</th>
+        <th scope="col">Current State</th>
+        <th scope="col">Last Run</th>
+        <th scope="col">Last Run Status</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for instance in task_list %}
+      <tr>
+        <td scope="row">{{ instance.id }}</td>
+        <td>{{ instance.description }}</td>
+        <td>{{ instance.current_state }}</td>
+        <td>{{ instance.last_run }}</td>
+        <td>{{ instance.last_run_status }}</td>
+        <td>
+          <a href="{% url 'tasks:run-task' instance.id %}" class="confirm-run"><i class="fa fa-location-arrow" aria-hidden="true"></i> </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
+
+{% block javascript %}
+  <script>
+    $(document).on('click', '.confirm-run', function(){
+      return confirm('Are you sure you want to run this?');
+    })
+</script>
+{% endblock javascript %}
+
+<script>
+  {% block jquery %}
+  $('#tasks-table').DataTable();
+  {% endblock jquery %}
+</script>

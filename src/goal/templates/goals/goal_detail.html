@@ -1,0 +1,365 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'goals:goal-list' %}">Goals</a></li>
+    <li><a href="#">{{ object.name }}</a></li>
+  </ul> 
+{% endblock viewname %}
+
+{% block content %}
+
+<div class="row">
+  <div class='col-sm-4 col-lg-4 col-md-12'>
+    <table class="table table-condensed table-borderless" id="goal-table">
+      <tr>
+        <td>Number</td>
+        <td colspan=2>{{ object.id }}</td>
+      </tr>
+      <tr>
+        <td>Goal</td>
+        <td colspan=2>{{ object.name }}</td>
+      </tr>
+      <tr>
+        <td>User</td>
+        <td colspan=2>{{ user_str }}</td>
+      </tr>
+      <tr>
+        <td rowspan=2>Target Amount</td>
+        <td>{{ object.final_val}}</td>
+        <td>{{ object.curr_val}}</td>
+      </tr>
+      <tr>
+        <td>as on {{ target_date }}</td>
+        <td>as on {{ object.start_date }}</td>
+      </tr>
+      <tr>
+        <td>Inflation</td>
+        <td colspan=2>{{ object.inflation }}%</td>
+      </tr>
+      <tr>
+        <td>Status</td>
+        <td colspan=2>
+          <!--canvas id="statusLineChart" width="200" height="200"></canvas-->
+          <div class="row" id="progressLine">
+            <!--div class="app-goals-bar__left-bar" style="width: 11%; background: rgb(239, 49, 137) none repeat scroll 0% 0%;">11</div--> 
+            <!--div class="app-goals-bar__right-bar" style="width: 89%; background: rgb(237, 230, 233) none repeat scroll 0% 0%;">89</div-->
+          </div>
+          
+          <div class="row" style="padding-top: 5px;padding-bottom: 10px;">
+            <div id="rectangle" style="width:25px;height:17px;background:green"></div>&nbsp;Achieved&nbsp;&nbsp;
+            <div id="rectangle" style="width:25px;height:17px;background:grey"></div>&nbsp;Projected&nbsp;&nbsp;
+            <div id="rectangle" style="width:25px;height:17px;background:red"></div>&nbsp;Remaining
+          </div>
+        </td>
+      </tr>
+      {% if status_text|length > 0 %}
+        <tr>
+          <td>Ways to achieve target</td>
+          <td colspan=2>
+            <ul>
+              {% for r in status_text %}
+                {% if r.0 == "avg_growth" %}
+                  <li> {{r.1}} per year at {{r.2}}% <i class="far fa-question-circle" style="font-size:0.8em;" data-toggle="tooltip" title="Avg growth"></i></li>
+                {% elif r.0 == "avg_contrib" %}
+                  <li> {{r.1}} <i class="far fa-question-circle" style="font-size:0.8em;" data-toggle="tooltip" title="Avg annual investment"></i> per year at {{r.2}}%</li>
+                {% elif r.0 == "last_year" %}
+                  <li>{{r.1}} <i class="far fa-question-circle" style="font-size:0.8em;" data-toggle="tooltip" title="Investment in last 1 year"></i> per year at {{r.2}}%</li>
+                {% elif r.0 == "default_8" %}
+                  <li>{{r.1}} per year at {{r.2}}%</li>
+                {% else %}
+                  <li>{{r.1}} per year at {{r.2}}%</li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+          </td>
+        </tr>
+      {% endif %}
+    </table>
+
+  </div>
+
+  <div class='col-sm-12 col-md-12 col-lg-6 card' style="width:100%;height:60vh;box-shadow: 2px 4px #888888;">
+    <canvas id="progressChart"></canvas>
+  </div>
+  <div class='col-sm-12 col-lg-2 col-md-12'>
+    <table class="table table-condensed table-borderless">
+      <tr>
+        <td>Average New Investment</td>
+        <td id="avg_new_investment"></td>
+      </tr>
+      <tr>
+        <td>Average Growth</td>
+        <td id="avg_growth"></td>
+      </tr>
+      <tr>
+        <td>Custom Growth</td>
+        <td>
+          <input type="number" id="custom_growth" step="1" max="100" min="1" name="custom_growth">
+        </td>
+      </tr>
+      <tr>
+        <td colspan=2>
+          <input type="button" id="additionalSimulation" disabled value="Additional Simulations">
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+<br><br><br>
+<div class="card-deck">
+  <div class="card" style="width:100%;height:28vh;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+    <canvas id="classificationChart"></canvas>
+  </div>
+  <div class="card" style="width:100%;height:28vh;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+    <canvas id="distributionChart"></canvas>
+  </div>
+  <div class="card" style="width:100%;height:28vh;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+    <canvas id="statusChart"></canvas>
+  </div>
+</div>
+<div>&nbsp;</div>
+{% endblock content %}
+
+<script>
+  {% block jquery %}
+  console.log({{distribution|safe}})
+  var debt_equity_labels = ['Debt', 'Equity', 'Gold', 'Cash']
+  var debt_equity = [{{ object.debt_contrib}}, {{ object.equity_contrib}}, {{ object.gold_contribution}}, {{ object.cash_contribution}}]
+
+  var status_labels = ['Achieved', 'Remaining']
+  var status_vals = [{{ object.achieved_amt}}, {{ object.pending_amt}}]
+    
+  var distribution_vals = {{distribution.vals | safe}}
+  var distribution_labels = {{distribution.labels | safe}}
+  var distribution_colors = {{distribution.colors | safe}}
+  setChart()
+
+  var progress_data = {{progress_data|safe}}
+  setProgressChart()
+  var status_line = {{status_line|safe}}
+  rem = {{object.final_val}}-{{final_projection}};
+  if (rem < 0) {
+    rem = 0
+  }
+  status_line_vals = [{{ object.achieved_amt}},{{final_projection}}-{{ object.achieved_amt}},rem]
+  setStatusLineChart(status_line, status_line_vals)
+
+  function setStatusLineChart(status_line, status_line_vals) {
+    colors = ['green','grey', 'red']
+    div_parent_elem = document.getElementById("progressLine")
+    var width = 0;
+    for (x in status_line) {
+      entry = status_line[x]
+      color = colors[x]
+      const newDiv = document.createElement("div");
+
+      // and give it some content
+      const newContent = document.createTextNode(entry);
+
+      // add the text node to the newly created div
+      newDiv.appendChild(newContent);
+      div_width = entry
+      if (width+div_width > 100) {
+        div_width=98-width;
+      }
+      if (div_width == 0) {
+        div_width=2;
+      }
+      newDiv.style.width=(div_width).toString()+'%';
+      width = width + div_width
+      newDiv.style.height='20px';
+      newDiv.style.textAlign='center';
+      newDiv.style.background=color+' none repeat scroll 0% 0%';
+      newDiv.title=status_line_vals[x];
+      //style="width: 11%; background: rgb(239, 49, 137) none repeat scroll 0% 0%;"
+      div_parent_elem.appendChild(newDiv)
+    }
+  }
+
+  $("#custom_growth").change(function () {
+    console.log('change in custom growth detected')
+    cgElem = document.getElementById("custom_growth")
+    var progress_endpoint = '/goal/api/chart/progress/{{object.id}}/' + $(this).val()
+    progress_data = {}
+    $.ajax({
+      method:"GET",
+      url:progress_endpoint,
+      success: function(data){
+        console.log(data)
+        progress_data = data
+        setProgressChart()
+      },
+      error: function(error_data){
+        console.log("error")
+        console.log(error_data)
+      }
+    })
+  })
+  function setProgressChart(){
+    console.log('setting progress chart')
+    var ctx = document.getElementById('progressChart').getContext('2d');
+    var config = {
+      type: 'bar',
+      data: progress_data.chart_data,
+      options: {
+        responsive: true,
+        maintainAspectRatio:false,
+        scales: {
+            xAxes: [{
+                stacked: true,
+                ticks: {
+                  beginAtZero: true
+                }
+            }],
+            yAxes: [{
+                stacked: true,
+                ticks: {
+                  beginAtZero: true
+                }
+            }]
+        }
+      }
+    };
+    var progressChart = new Chart(ctx,config);
+    aniElem = document.getElementById("avg_new_investment")
+    aniElem.innerHTML = progress_data.avg_contrib
+    agElem = document.getElementById("avg_growth")
+    var agVal = progress_data.avg_growth
+    agElem.innerHTML = agVal.toString() + "%";
+    var cgVal = progress_data.custom_growth
+    cgElem = document.getElementById("custom_growth")
+    cgElem.innerHTML = cgVal
+  }
+  function setChart(){
+    var ctx = document.getElementById('classificationChart').getContext('2d');
+    var config = {
+      type: 'pie',
+      data: {
+        datasets: [{
+          data: debt_equity,
+          backgroundColor: [
+            '#519463', '#a85b6a', '#ffd700','#E3CA95'
+          ],
+          label: 'Classification'
+        }],
+        labels: debt_equity_labels
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio:false,
+        tooltips: {
+            callbacks: {
+              label: function(tooltipItem, data) {
+                var dataset = data.datasets[tooltipItem.datasetIndex];
+                var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+                  return previousValue + currentValue;
+                });
+                var currentValue = dataset.data[tooltipItem.index];
+                var percentage = Math.floor(((currentValue/total) * 100)+0.5);         
+                return data.labels[tooltipItem.index] + ": " + currentValue + ' (' + percentage + "%)";
+              }
+            }
+          }
+      }
+    };
+    var ctx2 = document.getElementById('distributionChart').getContext('2d');
+    var config2 = {
+      type: 'doughnut',
+      data: {
+        datasets: [{
+          data: distribution_vals,
+          backgroundColor: distribution_colors,
+          label: 'Distribution'
+        }],
+        labels: distribution_labels
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio:false,
+        tooltips: {
+            callbacks: {
+              label: function(tooltipItem, data) {
+                var dataset = data.datasets[tooltipItem.datasetIndex];
+                var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+                  return previousValue + currentValue;
+                });
+                var currentValue = dataset.data[tooltipItem.index];
+                var percentage = Math.floor(((currentValue/total) * 100)+0.5);         
+                return data.labels[tooltipItem.index] + ": " + currentValue + ' (' + percentage + "%)";
+              }
+            }
+          }
+      }
+    };
+    var ctx3 = document.getElementById('statusChart').getContext('2d');
+    var config3 = {
+      type: 'pie',
+      data: {
+        datasets: [{
+          data: status_vals,
+          backgroundColor: [
+            '#519463', '#a85b6a'
+          ],
+          label: 'Status'
+        }],
+        labels: status_labels
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio:false,
+        tooltips: {
+            callbacks: {
+              label: function(tooltipItem, data) {
+                var dataset = data.datasets[tooltipItem.datasetIndex];
+                var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+                  return previousValue + currentValue;
+                });
+                var currentValue = dataset.data[tooltipItem.index];
+                var percentage = Math.floor(((currentValue/total) * 100)+0.5);         
+                return data.labels[tooltipItem.index] + ": " + currentValue + ' (' + percentage + "%)";
+              }
+            }
+          }
+      }
+    };
+    var classificationChart = new Chart(ctx,config);
+    var distributionChart = new Chart(ctx2, config2);
+    var statusChart = new Chart(ctx3, config3);
+  }
+
+  var csrftoken = getCookie('csrftoken');
+  $("#additionalSimulation").click(function(){
+    console.log("additionalSimulation button clicked");
+    console.log("data: " + progress_data);
+    //var csrftoken = getCookie('csrftoken');
+    $.ajax({
+        method: 'POST',
+        url: "/calculator/",
+        data : { 
+          'rd_prin': progress_data.avg_contrib,
+          'rd_int': progress_data.avg_growth,
+          'rd_time':1,
+          'rd_final_val':0,
+
+          'fd_int': progress_data.avg_growth,
+          'fd_prin':0,
+          'fd_final_val':0,
+          'fd_time':0,
+
+
+          "csrfmiddlewaretoken" : "{{csrf_token}}"
+        },
+        success : function(data) {
+            //$("#request-access").hide();
+            console.log("requested access complete");
+            window.location.href ='/calculator/'
+        }
+    });
+  });
+  {% endblock jquery %}
+</script>

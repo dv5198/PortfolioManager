@@ -1,0 +1,218 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}
+  <a style="padding-left:20px;" href="transactions"><i class="far fa-file-alt" aria-hidden="true" title="Transactions" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %}
+<ul class="breadcrumb">
+    <li><a href="{% url 'shares:shares-list' %}">Shares </a></li>
+    <li><a href="#">{{share_name}}</a></li>
+</ul>
+ 
+{% endblock viewname %}
+
+{% block content %}
+  <div class="row">
+    <div class='col-sm-4'>
+      <table class="table table-hover">
+        <tr>
+          <th scope="col">#</th>
+          <th>{{ object.id }}</th>
+        </tr>
+        <tr>
+          <th scope="col">exchange</th>
+          <td>{{ object.exchange }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Symbol</th>
+          <td>{{ object.symbol }}</td>
+        </tr>
+        <tr>
+          <th scope="col">User</th>
+          <td>{{ user_name_mapping|lookup:object.user }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Realised Gain</th>
+          <td>{{ object.realised_gain }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Quantity</th>
+          <td>{{ object.quantity }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Latest Price</th>
+          <td>{{scs}} {{ object.latest_price }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Avg. Buy Price</th>
+          <td>{{scs}} {{ object.buy_price }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Buy Value</th>
+          <td>{{pcs}} {{ object.buy_value }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Latest Value</th>
+          <td>{{pcs}} {{ object.latest_value }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Gain</th>
+          <td>{{pcs}} {{ object.gain }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Notes</th>
+          <td>{{ object.notes }}</td>
+        </tr>
+        <tr>
+          <th scope="col"><small>As On</small></th>
+          <td><small>{{ object.as_on_date }}</small></td>
+        </tr>
+        
+      </table>
+    </div>
+    <div class="col-sm-12 col-md-6 col-lg-4" style="width:75%;height:40vh">
+      <canvas id="compare"></canvas>
+    </div>
+  </div>
+  <div class="card-deck">
+    <div class="card" style="width:100%;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+      <h5>Split</h5>
+        {% if split %}
+          <table class="table table-hover">
+            {% if object.exchange in 'NASDAQ,NYSE' %}
+              <tr>
+                <th>Announcement Date</th>
+                <th>Ex-Date</th>
+                <th>Split Ratio</th>
+              </tr>
+              {% for s in split %}
+                <tr>
+                  <td>{{s.announcement_date}}</td>
+                  <td>{{s.ex_date}}</td>
+                  <td>{{s.old_fv}} for {{s.new_fv}}</td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <th>Announcement Date</th>
+                <th>Ex-Date</th>
+                <th>Old FV</th>
+                <th>New FV</th>
+              </tr>
+              {% for s in split %}
+                <tr>
+                  <td>{{s.announcement_date}}</td>
+                  <td>{{s.ex_date}}</td>
+                  <td>{{s.old_fv}}</td>
+                  <td>{{s.new_fv}}</td>
+                </tr>
+              {% endfor %}
+            {% endif %}
+          </table>
+        {% endif %}
+    </div>
+    <div class="card" style="width:100%;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+      <h5>Bonus</h5>
+        {% if bonus %}
+        
+          <table class="table table-hover">
+            <tr>
+              <th>Announcement Date</th>
+              <th>Record-Date</th>
+              <th>Ex-Date</th>
+              <th>Ratio</th>
+            </tr>
+            {% for b in bonus %}
+              <tr>
+                <td>{{b.announcement_date}}</td>
+                <td>{{b.record_date}}</td>
+                <td>{{b.ex_date}}</td>
+                <td>{{b.ratio}}</td>
+              </tr>
+            {% endfor %}
+          </table>
+        {% endif %}
+      </div>
+      <div class="card" style="width:100%;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+        <h5>Dividend</h5>
+        {% if dividend %}
+        
+        <table class="table table-hover">
+          <tr>
+            <th>Announcement Date</th>
+            <th>Ex-Date</th>
+            <th>Amount</th>
+          </tr>
+          {% for d in dividend %}
+            <tr>
+                <td>{{d.announcement_date}}</td>
+                <td>{{d.ex_date}}</td>
+                <td>{{d.amount}}</td>
+            </tr>
+          {% endfor %}
+        </table>
+        {% endif %}
+
+      </div>
+    </div>
+    <br>
+  {% endblock content %}
+
+  <script>
+    {% block jquery %}
+    {%if comp_vals %}
+    set_comparision_chart({{my_vals|safe}}, {{comp_vals|safe}}, {{chart_labels|safe}}, "{{my_name}}", "{{comp_name}}")
+    {% endif %}
+  function set_comparision_chart(my_vals, comp_vals, chart_labels, my_name, comp_name) {
+    var canvas = document.getElementById('compare');
+    new Chart(canvas, {
+      type: 'line',
+      data: {
+        //labels: ['1', '2', '3', '4', '5'],
+        labels: chart_labels,
+        datasets: [{
+          label: my_name,
+          yAxisID: my_name,
+          //data: [100, 96, 84, 76, 69],
+          data: my_vals,
+          borderColor: "#3e95cd",
+          fill: false
+        }, {
+          label: comp_name,
+          yAxisID: comp_name,
+          //data: [1, 1, 1, 1, 0],
+          data: comp_vals,
+          borderColor: "#bfff00",
+          fill: false
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio:false,
+        title: {
+          display: true,
+          text: my_name + ' vs ' + comp_name
+        },
+        scales: {
+          yAxes: [{
+            id: my_name,
+            type: 'linear',
+            position: 'left',
+          }, {
+            id: comp_name,
+            type: 'linear',
+            position: 'right'
+          }]
+        }
+      }
+    });
+  }
+{% endblock jquery %}
+</script>
+
+{% block javascript %}
+  {% load static %}
+{% endblock javascript %}

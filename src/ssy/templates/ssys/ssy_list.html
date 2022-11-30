@@ -1,0 +1,60 @@
+{% extends 'base.html' %} 
+{% load template_filters %}
+{% block viewname %} 
+  <ul class="breadcrumb">
+    <li><a href="#">SSY</a></li>
+  </ul>
+{% endblock %} 
+
+{% block applicableactions %} 
+    <a href="create"><i class="fa fa-plus" aria-hidden="true" title="Add SSY" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %}
+{% block canvas %}{% endblock canvas %}
+
+{% block content %}
+  <table class="table table-hover dt-responsive" id="ssy-table" style="width:100%">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Number</th>
+        <th scope="col">Start Date</th>
+        <th scope="col">User</th>
+        <th scope="col">Goal</th>
+        <th scope="col">Principal</th>
+        <th scope="col">Interest</th>
+        <th scope="col">Total</th>
+        <th scope="col">ROI</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for instance in object_list %}
+      <tr>
+        <th scope="row">{{ forloop.counter }}</th>
+
+        <td>
+          <a href="{% url 'ssys:ssy-detail' instance.number %}">{{ instance.number }}</a>
+        </td>
+        <td>{{ instance.start_date }}</td>
+        <td>{{ user_name_mapping|lookup:instance.user }}</td>
+        <td>{{ goal_name_mapping|lookup:instance.goal }}</td>
+        <td>{{ principal|lookup:instance.number }}</td>
+        <td>{{ interest|lookup:instance.number }}</td>
+        <td>{{ total|lookup:instance.number }}</td>
+        <td>{{ roi|lookup:instance.number }}</td>
+        <td>
+          <a href="{{ instance.get_absolute_url }}delete"><i class="fa fa-trash" aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}update"><i class="far fa-edit" aria-hidden="true"></i> </a>
+          <a href="{{ instance.get_absolute_url }}transactions"><i class="far fa-file-alt" aria-hidden="true"></i></a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
+
+<script>
+  {% block jquery %}
+  $('#ssy-table').DataTable();
+  {% endblock jquery %}
+</script>

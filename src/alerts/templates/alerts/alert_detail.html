@@ -1,0 +1,44 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}
+{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %} 
+<ul class="breadcrumb">
+  <li><a href="../">Alerts</a></li>
+  <li><a href="#">{{ object.id }}</a></li>
+</ul>
+{% endblock viewname %}
+
+{% block content %} 
+  <table class="table table-borderless" style="width:75%">
+    <tr>
+      <td>#</td>
+      <td>{{ object.id }}</td>
+    </tr>
+    <tr>
+      <td>Seen</td>
+      <td>{{ object.seen }}</td>
+    </tr>
+    <tr>
+      <td>Time of alert</td>
+      <td>{{ object.time }}</td>
+    </tr>
+    <tr>
+      <td>Summary</td>
+      <td>{{ object.summary }}</td>
+    </tr>
+    <tr>
+      <td>Content</td>
+      <td>{{ object.content }}</td>
+    </tr>
+  </table>
+{% endblock content %}
+
+<script>
+{% block jquery %}
+
+{% endblock jquery %}
+</script>

@@ -1,0 +1,273 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'users:user-list' %}">Users</a></li>
+    <li><a href="#">{{ object.name }}</a></li>
+  </ul>
+{% endblock viewname %}
+
+{% block content %}
+
+  <table class="table table-primary">
+    <thead class="">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Name</th>
+        <th scope="col">Short Name</th>
+        <th scope="col">e-mail</th>
+        <th scope="col">DOB</th>
+        <th scope="col">Total Net worth</th>
+        <th scope="col">Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>{{ object.id }}</th>
+        <td>{{ object.name }}</td>
+        <td>{{ object.short_name }}</td>
+        <td>{{ object.email }}</td>
+        <td>{{ object.dob }}</td>
+        <td>{{ object.total_networth }} <small>As on {{last_updated}}</small></td>
+        <td>{{ object.notes }}</td>
+      </tr>
+    </tbody>
+  </table>
+<br><br><br>
+<div class="card-deck">
+  <div style="width:100%;height:28vh;box-shadow: 2px 4px #888888;" class='card col-sm-12 col-md-6 col-lg-4'>
+    <canvas id="classificationChart"></canvas>
+  </div>
+  <div style="width:100%;height:28vh;box-shadow: 2px 4px #888888;" class='card col-sm-12 col-md-6 col-lg-4'>
+    <canvas id="distributionChart"></canvas>
+  </div>
+  <div style="width:100%;height:28vh;box-shadow: 2px 4px #888888;" class='card col-sm-12 col-md-6 col-lg-4'>
+    <canvas id="statusChart"></canvas>
+  </div>
+</div>
+<div>&nbsp;</div>
+{% if investment_types|length > 0 %}
+<h5>Contributions and withdrawls over the years</h5><hr>
+<table class="table table-hover dt-responsive" id="yrly-contrib" style="width:100%">
+  <thead>
+    <tr>
+      <th>Year</th>
+      {% for inv_type in investment_types %}
+      <th>{{inv_type}}</th>
+      {% endfor %}
+    </tr> 
+  </thead>
+  <tbody>
+    {% for key,value in  yrly_investment.items %}
+      <tr>
+        <td><a href="#" onclick="get_monthly_contrib({{key}});return false;">{{key}}</a></td>
+        {% for inv_type in investment_types %}
+        <td>
+          {{value|lookup:inv_type}}
+        </td>
+        {% endfor %}
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Contributions by month</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="divtoaddresult"></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+  <div>&nbsp;</div>
+{% endblock content %}
+
+<script>
+  {% block jquery %}
+  $('#yrly-contrib').DataTable();
+  {% endblock jquery %}
+</script>
+
+{% block ajaxcalls %}
+          {
+            url      : '/user/api/chart/data/{{ object.id }}',
+            data     : null,
+            callback : get_vals_and_set_chart
+          },
+{% endblock ajaxcalls %}
+
+{% block javascript %}
+  <script>
+
+    function get_monthly_contrib(year) {
+      console.log(year)
+      cgElem = document.getElementById("custom_growth")
+      var ep = '/user/api/get/users_contrib/{{object.id}}/' + year
+      data = {}
+      $.ajax({
+        method:"GET",
+        url:ep,
+        beforeSend: function () {
+          $("exampleModalLabel").html(year);
+          $("#divtoaddresult").html("Processing, please wait...");
+        },
+        success: function(data){
+          console.log(data)
+          $('#exampleModal').modal('show')
+          html_data = "<table class='table table-hover dt-responsive'><tr><th></th>"
+          for (i=0;i<data.headers.length;i++) {
+            html_data += "<th>"+data.headers[i]+"</th>"
+          }
+          html_data += "</tr>"
+          for(var key in data.vals) {
+            value = data.vals[key]
+	          console.log(key + " = " + value);
+            html_data += "<tr><th>" + key + "</th>"
+            for (i=0;i<value.length;i++) {
+              html_data += "<td>" + value[i] + "</td>"
+            }
+            html_data += "</tr>"
+
+          }
+          html_data += "</table>"
+          $("#divtoaddresult").html(html_data);
+          $('#exampleModal').modal('handleUpdate')
+          $("exampleModalLabel").text(year);
+        },
+        error: function(error_data){
+          console.log("error")
+          console.log(error_data)
+        }
+      })
+    }
+
+    function get_vals_and_set_chart(data) {
+      var debt_equity = [0, 0, 0]
+      var done_pending = [0, 0]
+      var debt_equity_labels = ['Debt', 'Equity', 'Gold', 'Cash']
+      var status_vals = [0, 0]
+      var status_labels = ['Achieved', 'Remaining']
+      var distribution_vals = [0, 0]
+      var distribution_labels = ['PPF', 'MF']
+      
+      console.log(data)
+      debt_equity = [data.debt, data.equity, data.gold, data.cash]
+      distribution_vals = data.distrib_vals
+      distribution_labels = data.distrib_labels
+      distribution_colors = data.distrib_colors
+      status_vals = [data.achieved, data.remaining]
+      console.log("debt_equity values")
+      console.log(debt_equity)
+      console.log("distribution_vals values")
+      console.log(distribution_vals)
+      console.log("status_vals values")
+      console.log(status_vals)
+
+      var ctx = document.getElementById('classificationChart').getContext('2d');
+      var config = {
+        type: 'pie',
+        data: {
+          datasets: [{
+            data: debt_equity,
+            backgroundColor: [
+              '#519463', '#a85b6a', '#ffd700', '#E3CA95'
+            ],
+            label: 'Classification'
+          }],
+          labels: debt_equity_labels
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio:false,
+          tooltips: {
+            callbacks: {
+              label: function(tooltipItem, data) {
+                var dataset = data.datasets[tooltipItem.datasetIndex];
+                var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+                  return previousValue + currentValue;
+                });
+                var currentValue = dataset.data[tooltipItem.index];
+                var percentage = Math.floor(((currentValue/total) * 100)+0.5);         
+                return data.labels[tooltipItem.index] + ": " + currentValue + ' (' + percentage + "%)";
+              }
+            }
+          }
+        }
+      };
+      var ctx2 = document.getElementById('distributionChart').getContext('2d');
+      var config2 = {
+        type: 'doughnut',
+        data: {
+          datasets: [{
+            data: distribution_vals,
+            backgroundColor: distribution_colors,
+            label: 'Distribution'
+          }],
+          labels: distribution_labels
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio:false,
+          tooltips: {
+            callbacks: {
+              label: function(tooltipItem, data) {
+                var dataset = data.datasets[tooltipItem.datasetIndex];
+                var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+                  return previousValue + currentValue;
+                });
+                var currentValue = dataset.data[tooltipItem.index];
+                var percentage = Math.floor(((currentValue/total) * 100)+0.5);         
+                return data.labels[tooltipItem.index] + ": " + currentValue + ' (' + percentage + "%)";
+              }
+            }
+          }
+        }
+      };
+      var ctx3 = document.getElementById('statusChart').getContext('2d');
+      var config3 = {
+        type: 'pie',
+        data: {
+          datasets: [{
+            data: status_vals,
+            backgroundColor: [
+              '#519463', '#a85b6a'
+            ],
+            label: 'Status'
+          }],
+          labels: status_labels
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio:false,
+          tooltips: {
+            callbacks: {
+              label: function(tooltipItem, data) {
+                var dataset = data.datasets[tooltipItem.datasetIndex];
+                var total = dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+                  return previousValue + currentValue;
+                });
+                var currentValue = dataset.data[tooltipItem.index];
+                var percentage = Math.floor(((currentValue/total) * 100)+0.5);         
+                return data.labels[tooltipItem.index] + ": " + currentValue + ' (' + percentage + "%)";
+              }
+            }
+          }
+        }
+      };
+      var classificationChart = new Chart(ctx,config);
+      var distributionChart = new Chart(ctx2, config2);
+      var statusChart = new Chart(ctx3, config3);
+    }
+  </script>
+{% endblock javascript %}

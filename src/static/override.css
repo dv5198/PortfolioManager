@@ -1,0 +1,260 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800;900&display=swap');
+
+*
+{
+    margin: 0;
+    padding: 0;
+    box-sizing:border-box;
+    font-family: 'Roboto', sans-serif,'Segoe UI', Tahoma, Verdana, sans-serif;
+}
+
+body
+{
+    min-height: 100vh;
+    background: #fff;
+}
+
+.navigation
+{
+    position: fixed;
+    width: 60px;
+    height: 100%;
+    background: #533474;
+    transition: 0.5s;
+    overflow: scroll;
+}
+
+.main
+{
+    margin-left:60px;
+    margin-top: 0px;
+    transition: 0.5s;
+    overflow:scroll;
+    scroll-behavior: auto;
+    padding: 0px 10px 0px 10px;
+}
+
+.logo
+{
+    margin-left:60px;
+    padding: 0px 0px 0px 0px;
+    transition: 0.5s;
+}
+
+.navigation.active
+{
+    width: 200px;
+}
+
+.main.deactive
+{
+    margin-left: 200px;   
+}
+
+.logo.deactive
+{
+    margin-left: 200px;   
+}
+
+.navigation ul
+{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+}
+
+.navigation ul li:hover
+{
+    background: #368abf;
+}
+
+.navigation ul li
+{
+    position: relative;
+    width: 100%;
+    list-style: none;
+}
+
+.navigation ul li.active
+{
+    background: #9b7db8;
+}
+
+.navigation ul li a
+{
+    position: relative;
+    display: block;
+    width: 100%;
+    display: flex;
+    text-decoration: none;
+    color: #fff;
+}
+
+.navigation ul li a .icon
+{
+    position: relative;
+    display: block;
+    min-width: 60px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    padding: 0px 30px 0px 0px;
+}
+
+.navigation ul li a .icon .fas
+{
+    font-size: 20px;
+}
+
+.navigation ul li a .title
+{
+    position: relative;
+    display: block;
+    padding: 0px 0px 0px 0px;
+    margin-left:0;
+    margin-right: 10px;
+    height: 30px;
+    line-height: 30px;
+    text-align: start;
+    white-space: nowrap;
+}
+
+.toggle
+{
+    position: absolute;
+    top:0;
+    right:0;
+    width: 60px;
+    height:60px;
+    background: #533474;
+    cursor: pointer;
+    text-align: center;
+    padding: 15px 0;
+}
+
+
+.toggle:hover
+{
+    background: #368abf;
+}
+
+.toggle:before
+{
+    font-family: "fontAwesome";
+    position:absolute;
+    width: 100%;
+    height: 100%;
+    line-height: 60px;
+    text-align: center;
+    font-size: 24px;
+    color:#fff;
+}
+
+p {
+    font-family : "Verdana";
+    font-size: 14px;
+}
+h1 {
+    font-family: "Verdana";
+    font-size: 14px;
+}
+table {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 14px;
+}
+div {
+    font-family: "Verdana";
+    font-size: 14px;
+}
+
+.breadcrumb { 
+    list-style: none; 
+    overflow: hidden; 
+    font: 14px Verdana, Helvetica, Arial, Sans-Serif;
+}
+
+.breadcrumb li a {
+    color: white;
+    text-decoration: none; 
+    padding: 5px 15px 5px 12px;
+    background: transparent;
+    position: relative; 
+    display: block;
+    float: left;
+    z-index: 1;
+}
+
+.breadcrumb li a:after { 
+    content: " "; 
+    display: block; 
+    width: 96%; 
+    height: 50%;
+    background: linear-gradient(to bottom, lightblue, rgb(63, 130, 218)); 
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: -1; 
+    -webkit-transform: skewX(35deg); 
+    transform: skewX(35deg); 
+}
+
+.breadcrumb li a:before { 
+    content: " "; 
+    display: block; 
+    width: 96%; 
+    height: 50%;
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    z-index: -1; 
+    background: linear-gradient(to bottom,  rgb(63, 130, 218), black); 
+    -webkit-transform: skewX(-35deg); 
+    transform: skewX(-35deg);
+}
+
+.breadcrumb li a:hover:after { 
+    background: linear-gradient(to bottom, black,  rgb(63, 130, 218)); 
+}
+
+.breadcrumb li a:hover:before { 
+    background: linear-gradient(to bottom,  rgb(63, 130, 218), lightblue); 
+}
+
+@media (max-width: 767px)
+{
+    .navigation
+    {
+        left: -60px;
+    }
+    .navigation.active
+    {
+        left: 0px;
+        width: 100%;
+    }
+    .main
+    {
+        margin-left:0px;
+        width:100%;
+        padding: 60px 0px 0px 0px;
+    }
+    .main.deactive
+    {
+        width:0%;
+        display: none;
+    }
+    .logo.deactive
+    {
+        width:0%;
+        display: none;
+    }
+    .logo
+    {
+        left: -60px;
+    }
+}
+
+.paddingBetweenCols td
+{
+    padding:0 15px;
+}

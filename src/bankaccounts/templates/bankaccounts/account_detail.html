@@ -1,0 +1,110 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}
+
+<a href="transactions"><i class="far fa-file-alt" aria-hidden="true" title="Transactions" style="font-size: 1.2em;"></i></a>
+{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %} 
+  <ul class="breadcrumb">
+    <li><a href="{% url 'bankaccounts:account-list' %}">Bank Accounts</a></li>
+    <li><a href="#">{{number}}</a></li>
+  </ul>
+{% endblock viewname %}
+
+{% block content %}
+<div class="card-deck">
+  <div class="card" style="width:100%;box-shadow: 2px 4px #888888;" class='col-sm-12 col-md-6 col-lg-4'>
+    <table class="table table-hover">
+      <tr>
+        <th scope="col">Number</th>
+        <td>{{number}}</td>
+      </tr>
+      <tr>
+        <th scope="col">Account Type</th>
+        <td>{{acc_type}}</td>
+      </tr>
+      <tr>
+        <th scope="col">Bank Name</th>
+        <td>{{bank_name}}</td>
+      </tr>
+      <tr>
+        <th scope="col">Balance</th>
+        <td>{{balance}}</td>
+      </tr>
+        <tr>
+          <th scope="col">As On</th>
+          <td>{{ as_on_date }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Currency</th>
+          <td>{{ currency }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Balance ({{preferred_currency}})</th>
+          <td>{{ balance_preferred_currency }}</td>
+        </tr>
+        <tr>
+          <th scope="col">User</th>
+          <td>{{ user }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Goal</th>
+          <td>{{ goal }}</td>
+        </tr>
+        <tr>
+          <th scope="col">Notes</th>
+          <td>{{ notes }}</td>
+        </tr>
+    </table>
+  </div>
+  <div class="card" style="width:100%;box-shadow: 2px 4px #888888;" class="col-sm-12 col-md-6 col-lg-4">
+    <canvas id="balance-progress"></canvas>
+  </div>
+</div>
+<br>
+{% endblock content %}
+
+<script>
+  {% block jquery %}
+    {%if bal_vals %}
+      set_bal_chart({{bal_vals|safe}}, {{chart_labels|safe}})
+    {% endif %}
+
+    function set_bal_chart(bal_vals, chart_labels) {
+      var canvas = document.getElementById('balance-progress');
+      new Chart(canvas, {
+        type: 'line',
+        data: {
+          //labels: ['1', '2', '3', '4', '5'],
+          labels: chart_labels,
+          datasets: [{
+            label: 'Balance',
+            yAxisID: 'Balance',
+            //data: [100, 96, 84, 76, 69],
+            data: bal_vals,
+            borderColor: "#3e95cd",
+            fill: false
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio:false,
+          title: {
+            display: true,
+            text: 'Account Balance'
+          },
+          scales: {
+            yAxes: [{
+              id: 'Balance',
+              type: 'linear',
+              position: 'left',
+            }]
+          }
+        }
+      });
+    }
+  {% endblock jquery %}
+</script>

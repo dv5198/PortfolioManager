@@ -1,0 +1,134 @@
+{% extends 'base.html' %} 
+
+{% block applicableactions %}{% endblock applicableactions %} 
+
+{%block canvas %}{% endblock canvas %}
+
+{% block viewname %}
+  <ul class="breadcrumb">
+    <li><a href="{% url 'common:common-list' %}">Internals</a></li>
+    <li><a href="#">Preferences</a></li>
+  </ul>
+{% endblock viewname %}
+
+
+{% block content %}
+    <form method="POST">
+        {% csrf_token %}
+        <div class="row">
+            <div class='col-sm-10'>
+
+                <div class="form-group row">
+                    <label for="tz" class="col-sm-2 col-form-label">Timezone</label>
+                    <div class="col-sm-8">
+                        <div class="md-form mt-1">
+                            <input list="timezones" name="timezone" value="{{tz}}" size="47">
+                            <datalist id="timezones">
+                                <option value="">
+                                <option value="{{tz}}">
+                            </datalist>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="indexes" class="col-sm-2 col-form-label">Indexes To Scroll</label>
+
+                    <div class="col-sm-8">
+                        <select class="form-select col-sm-6" multiple data-live-search="true" name="index_scroll" id="index_scroll">
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="backup" class="col-sm-2 col-form-label">Document Backup Directory</label>
+                    <div class="col-sm-8">
+                        <div class="md-form mt-1">
+                            <input name="doc_backup" value="{{document_backup_locn}}" size="47">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="backup" class="col-sm-2 col-form-label">Show zero value shares</label>
+                    <div class="col-sm-8">
+                        <div class="md-form mt-1">
+                            <input type="checkbox" name="show_zero_val_shares" id="show_zero_val_shares" value="{{show_zero_val_shares}}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="backup" class="col-sm-2 col-form-label">Show zero value MFs</label>
+                    <div class="col-sm-8">
+                        <div class="md-form mt-1">
+                            <input type="checkbox" name="show_zero_val_mfs" id="show_zero_val_mfs" value="{{show_zero_val_mfs}}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-sm-6">
+                        <div class="md-form mt-0">
+                            <button type="submit" class="btn btn-primary" name="submit">Submit</button>
+                            <a href="../common" class="btn btn-danger" role="button">Cancel</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock content %}
+
+{% block javascript %}
+  <script>
+      var timezones = {{ tzs|safe }}
+      console.log(timezones);
+      var dlist = document.getElementById('timezones');
+      for (x in timezones) {
+          timezone = timezones[x];
+          var opt = document.createElement('option');
+          //opt.appendChild(document.createTextNode(timezone));
+          opt.value=timezone;
+          dlist.appendChild(opt);
+      }
+      var indexes = {{ indexes|safe }}
+      var sel_indexes = {{ sel_indexes|safe }}
+      console.log(indexes);
+      var ilist = document.getElementById('index_scroll');
+      $('#index_scroll').empty();
+      for (x in indexes) {
+          index = indexes[x];
+          if (sel_indexes.includes(index)) {
+            $('#index_scroll')
+                .append($('<option>', { value : index })
+                .text(index)
+                .attr('selected',true));
+        } else {
+            $('#index_scroll')
+                .append($('<option>', { value : index })
+                .text(index));
+        }
+      }
+
+    e = document.getElementById('show_zero_val_shares');
+    var show = "{{show_zero_val_shares|safe}}"
+    console.log(e.checked);
+    console.log(show);
+    if (show == "True") {
+      e.checked = true;
+    } else {
+      e.checked = false;
+    }
+
+    e = document.getElementById('show_zero_val_mfs');
+    var show = "{{show_zero_val_mfs|safe}}"
+    console.log(e.checked);
+    console.log(show);
+    if (show == "True") {
+      e.checked = true;
+    } else {
+      e.checked = false;
+    }
+  </script>
+{% endblock javascript %}
