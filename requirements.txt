@@ -69,7 +69,7 @@ requests-file==1.5.1
 rich==10.4.0
 robin-stocks==2.0.3
 rope==0.18.0
-scipy==1.6.0
+scipy==1.8.0
 selenium==3.141.0
 service-identity==18.1.0
 sgmllib3k==1.0.0
