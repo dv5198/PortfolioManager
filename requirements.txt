@@ -8,7 +8,7 @@ bs4==0.0.1
 bsedata==0.4.0
 casparser==0.4.7
 casparser-isin==2021.6.1
-certifi==2020.4.5.1
+certifi==2023.7.22.1
 cffi==1.14.4
 channels==3.0.3
 chardet==3.0.4
