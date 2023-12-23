@@ -28,7 +28,7 @@ feedfinder2==0.0.4
 feedparser==6.0.2
 filelock==3.0.12
 google-currency==1.0.9
-huey==2.3.0
+huey==2.5.0
 hyperlink==20.0.1
 idna==2.9
 incremental==17.5.0
