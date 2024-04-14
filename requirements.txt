@@ -30,7 +30,7 @@ filelock==3.0.12
 google-currency==1.0.9
 huey==2.3.0
 hyperlink==20.0.1
-idna==2.9
+idna==3.7
 incremental==17.5.0
 isort==5.6.4
 jieba3k==0.35.1
