@@ -26,7 +26,7 @@ djangorestframework==3.11.2
 enum34==1.1.10
 feedfinder2==0.0.4
 feedparser==6.0.2
-filelock==3.0.12
+filelock==3.20.3
 google-currency==1.0.9
 huey==2.3.0
 hyperlink==20.0.1
